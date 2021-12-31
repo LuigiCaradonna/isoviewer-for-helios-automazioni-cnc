@@ -23,6 +23,7 @@ class MainWindow(QMainWindow):
 
     iso_file = ''
     scale_factor = 1
+    # Dimensioni della scena
     scene_w = 0
     scene_h = 0
 
@@ -33,6 +34,7 @@ class MainWindow(QMainWindow):
     # l'antialiasing non si usa
     canvas_expanded = 4
 
+    # Posizioni minime e massime della lavorazione
     x_min = 10000
     y_min = 10000
     z_min = 0
@@ -49,7 +51,7 @@ class MainWindow(QMainWindow):
 
     # Indica se è stata disegnata una primitiva sulla scena
     iso_drawn = False
-
+    # Indica se è stato avviato un timer
     timer_started = False
 
     def __init__(self):
@@ -91,15 +93,17 @@ class MainWindow(QMainWindow):
         '''
         Override del metodo della classe QMainWindow
         '''
-        # Se non c'è un timer attivo
-        if not self.timer_started:
-            # Avvia il timer
+        # Se c'è qualcosa sulla scena
+        if self.iso_drawn:
+            # Se non c'è un timer attivo
+            if not self.timer_started:
+                # TODO: Avvia il timer
 
-            # Indica che il timer è stato avviato
-            self.timer_started = True
-        else:
-            # Resetta il timer
-            pass
+                # Indica che il timer è stato avviato
+                self.timer_started = True
+            else:
+                # TODO: Resetta il timer
+                pass
 
         # Quando si ridimensiona la finestra, vanno reimpostate le misure della scena
         self.scene_w, self.scene_h = self.getCanvasSize()
@@ -223,7 +227,7 @@ class MainWindow(QMainWindow):
         self.scale_factor = 1
         self.iso_file = ''
         self.ui.lbl_selected_file.setText('')
-
+        # Indica che la scena è vuota
         self.iso_drawn = False
 
     def setScene(self):
@@ -357,8 +361,8 @@ class MainWindow(QMainWindow):
                 # G02 Z-10
                 # G02 X150 Y200 Z-10
                 # In questo caso, nella lista delle coordinate per le incisioni ci sarebbero
-                # ((100, 0), (0, 0), (150, 200))
-                # ma la linea da (0, 0) a (150, 200) non è da disegnare, quindi "up" indicherà questa situazione
+                # ((100, 0), (0, 0), (150, 100))
+                # ma la linea da (0, 0) a (150, 100) non è da disegnare, quindi "up" indicherà questa situazione.
                 # Inoltre quando si incontra un "up" si dovrà leggere l'ultima quota Z per sapere di quanto si alza l'utensile
                 # nello specifico sarà il valore assoluto dell'ultima quota Z
                 coords.append(('up', 0, 0))
@@ -405,6 +409,15 @@ class MainWindow(QMainWindow):
         # print('x: ' + str(int(pos.x())) + ' | y: ' + str(int(pos.y())))
 
     def draw(self):
+        # Per quando sarà disponibile il timer
+        # Se è stato avviato un timer, vuol dire che la funzione 
+        # è stata chiamata al suo scadere
+        if self.timer_started:
+            # TODO: Ferma il timer
+
+            # Indica che non c'è più un timer attivo
+            self.timer_started = False
+
         self.resetErrors()
 
         if self.checkData():
@@ -418,6 +431,7 @@ class MainWindow(QMainWindow):
             self.ui.lbl_y_min_value.setText('{:.3f}'.format(self.y_min))
             self.ui.lbl_y_max_value.setText('{:.3f}'.format(self.y_max))
 
+            # Ingombro della lavorazione
             drawing_w = self.x_max - self.x_min
             drawing_h = self.y_max - self.y_min
 
@@ -545,6 +559,7 @@ class MainWindow(QMainWindow):
                         self.scene_h - (coords[i][1] * self.scale_factor)
                     )
 
+                    # Aggiungo il segmento alla scena
                     self.scene.addLine(QtCore.QLine(p1, p2))
 
                     # Aggiorna la posizione corrente
@@ -554,6 +569,7 @@ class MainWindow(QMainWindow):
                     # Aggiorno il valore della Z da usare per calcolare la distanza del movimento quando si alza l'utensile
                     self.last_z = coords[i][2]
 
+                    # Aggiorno il conto delle linee
                     lines += 1
 
                     # Imposto i flag
@@ -564,5 +580,7 @@ class MainWindow(QMainWindow):
                     # Termina l'iterazione
                     continue
 
+            # Indico che sulla scena è stato disegnato qualcosa
             self.iso_drawn = True
+            # Calcolo la stima del tempo di lavorazione
             self.workingTime(engraving_dst, positioning_dst)
