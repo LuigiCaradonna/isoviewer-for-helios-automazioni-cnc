@@ -110,7 +110,7 @@ class MainWindow(QMainWindow):
 
     def showEvent(self, event):
         '''
-        Metodo chiamato quando la MainWindow è pronta e visualizzata
+        Override del metodo chiamato quando la MainWindow è pronta e visualizzata
         '''
         # Inizializzo le dimensioni della scena per avere una posizione valida del mouse anche prima
         # di caricare una primitiva
@@ -119,10 +119,11 @@ class MainWindow(QMainWindow):
         # print(str(self.scene_w) + ' X ' + str(self.scene_h))
 
     def getCanvasSize(self):
+        '''Restituisce le dimensioni visibili del canvas'''
         return (self.ui.canvas.width() - self.canvas_expanded, self.ui.canvas.height() - self.canvas_expanded)
 
     def resetCoordinatesLimits(self):
-
+        '''Resetta le posizioni minime e massime della lavorazione'''
         self.x_min = 10000
         self.y_min = 10000
         self.z_min = 0
@@ -130,10 +131,15 @@ class MainWindow(QMainWindow):
         self.y_max = 0
 
     def browseFile(self):
+        '''Apre la finestra di dialogo per la scelta del file iso'''
         self.iso_file, _ = QFileDialog.getOpenFileName(self, 'OpenFile')
         self.ui.lbl_selected_file.setText(self.iso_file)
 
     def resetErrors(self):
+        '''
+        Resetta i campi di input, la label contenente il file iso scelto e la status bar
+        per eliminare eventuali indicazioni di errore
+        '''
         self.ui.in_width.setStyleSheet("border: 1px solid black")
         self.ui.in_height.setStyleSheet("border: 1px solid black")
         self.ui.in_tool_speed.setStyleSheet("border: 1px solid black")
@@ -141,11 +147,21 @@ class MainWindow(QMainWindow):
         self.ui.statusbar.showMessage('')
 
     def checkData(self):
+        '''Valida i dati immessi prima di elaborare il file iso'''
+
         # Verifica se il file indicato esiste e se è un file PGR
         if not os.path.isfile(self.iso_file) or not self.iso_file[-3:] == 'PGR':
             self.ui.lbl_selected_file.setStyleSheet("border: 1px solid red")
             self.ui.statusbar.showMessage('Indicare un file ISO valido')
             return False
+        # Se il file indicato esiste ed ha estensione PGR
+        else:
+            with open(self.iso_file) as f:
+                # Se non inizia con "QUOTE RELATIVE"
+                if f.readline().rstrip() != 'QUOTE RELATIVE':
+                    self.ui.lbl_selected_file.setStyleSheet("border: 1px solid red")
+                    self.ui.statusbar.showMessage('Indicare un file ISO valido')
+                    return False
 
         # Se il campo width è vuoto, impostalo a 0
         if self.ui.in_width.text() == '':
@@ -207,6 +223,10 @@ class MainWindow(QMainWindow):
         return True
 
     def scaleFactor(self, w, h):
+        '''
+        Calcola il fattore di scala per ridimensionare il disegno della lavorazione
+        in modo che si adatti alle dimensioni della scena
+        '''
         # N.B. non uso self.scene_w e self.scene_h impostate in showEvent() al posto di
         # per le dimensioni della scena, perché dopo l'apparizione della finestra, questa può essere
         # ridimensionata e quindi le dimensioni del canvas potrebbero essere diverse
@@ -222,6 +242,7 @@ class MainWindow(QMainWindow):
         return scale_x if scale_x <= scale_y else scale_y
 
     def resetScene(self):
+        '''Reimposta la scena allo stato iniziale'''
         # Resetta la scena
         self.scene.clear()
         self.scale_factor = 1
@@ -231,6 +252,8 @@ class MainWindow(QMainWindow):
         self.iso_drawn = False
 
     def setScene(self):
+        '''Prepara la scena per contenere il disegno della lavorazione appena elaborata'''
+
         # Resetta la scena
         self.resetScene()
 
@@ -272,6 +295,7 @@ class MainWindow(QMainWindow):
             self.scene.addRect(QtCore.QRectF(0, 0, self.scene_w, self.scene_h))
 
     def getCoordinates(self):
+        '''Legge il file iso ed estrapola coordinate e dati utili al tracciamento del disegno della lavorazione'''
         # apri il file ISO
         original_file = open(self.iso_file, 'r')
         # copia il contenuto del file
@@ -389,6 +413,7 @@ class MainWindow(QMainWindow):
         return coords
 
     def workingTime(self, eng_dst, pos_dst):
+        '''Calcola una stima del tempo di lavorazione'''
         tot_dst = eng_dst + pos_dst
 
         seconds = (tot_dst / float(self.ui.in_tool_speed.text())) * 60
@@ -397,10 +422,7 @@ class MainWindow(QMainWindow):
             time.strftime('%H:%M:%S', time.gmtime(seconds)))
 
     def mousePosition(self, pos):
-
-        # Se si deve disegnare il rettangolo che delimita la lastra, va considerato
-        # l'eventuale padding impostato rispetto al canvas, in modo che da coordinate,
-        # l'angolo in basso a sinistra risulti su (0,0)
+        '''Mostra sull'interfaccia le coordinate del puntatore del mouse adeguate al fattore di scala in uso'''
         self.ui.lbl_mouse_pos_x.setText(
             str(int(pos.x() * (1/self.scale_factor))))
         self.ui.lbl_mouse_pos_y.setText(
@@ -409,8 +431,10 @@ class MainWindow(QMainWindow):
         # print('x: ' + str(int(pos.x())) + ' | y: ' + str(int(pos.y())))
 
     def draw(self):
+        '''Traccia il disegno della lavorazione'''
+
         # Per quando sarà disponibile il timer
-        # Se è stato avviato un timer, vuol dire che la funzione 
+        # Se è stato avviato un timer, vuol dire che la funzione
         # è stata chiamata al suo scadere
         if self.timer_started:
             # TODO: Ferma il timer
