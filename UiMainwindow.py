@@ -425,7 +425,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"ISO Viewer", None))
         self.btn_browse_file.setText(QCoreApplication.translate("MainWindow", u"Load ISO file", None))
         self.lbl_selected_file.setText("")
-        self.btn_draw.setText(QCoreApplication.translate("MainWindow", u"Avvia", None))
+        self.btn_draw.setText(QCoreApplication.translate("MainWindow", u"Elabora", None))
         self.btn_reset.setText(QCoreApplication.translate("MainWindow", u"Reset", None))
         self.lbl_size.setText(QCoreApplication.translate("MainWindow", u"Dimensioni lastra", None))
         self.lbl_width.setText(QCoreApplication.translate("MainWindow", u"L (mm)", None))
