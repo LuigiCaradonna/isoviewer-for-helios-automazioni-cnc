@@ -21,6 +21,7 @@ class ResettableTimer(threading.Thread):
     def run(self):
         print('Run timer...')
         while not self.terminate_event.is_set():
+            print('While loop')
             while self.count > 0 and self.start_event.is_set():
                 print(self.count)
                 # Wait for a small chunk of timeout

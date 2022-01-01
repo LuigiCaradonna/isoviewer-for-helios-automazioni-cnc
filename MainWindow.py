@@ -271,7 +271,7 @@ class MainWindow(QMainWindow):
 
         return scale_x if scale_x <= scale_y else scale_y
 
-    def resetScene(self, draw=False):
+    def resetScene(self, reset_to_draw=False):
         '''
         Reimposta la scena allo stato iniziale
         Param - boolean draw: se false resetta anche il file selezionato
@@ -279,7 +279,15 @@ class MainWindow(QMainWindow):
         # Resetta la scena
         self.scene.clear()
         self.scale_factor = 1
-        if not draw:
+        self.ui.lbl_x_min_value.setText('')
+        self.ui.lbl_x_max_value.setText('')
+        self.ui.lbl_y_min_value.setText('')
+        self.ui.lbl_y_max_value.setText('')
+        self.ui.lbl_z_max_value.setText('')
+        self.ui.lbl_rectangle_value.setText('')
+        self.ui.lbl_offset_value.setText('')
+        self.ui.lbl_working_time_value.setText('')
+        if not reset_to_draw:
             self.iso_file = ''
             self.ui.lbl_selected_file.setText('')
         # Indica che la scena è vuota
@@ -330,6 +338,12 @@ class MainWindow(QMainWindow):
 
     def getCoordinates(self):
         '''Legge il file iso ed estrapola coordinate e dati utili al tracciamento del disegno della lavorazione'''
+        # Indica se ci si trova sul primo punto in cui l'utensile si abbassa per la lavorazione
+        first_down = False
+        # Il posizionamento per il punto su cui si inizia a lavorare è dopo il secondo G12 Z0
+        # in questa variabile porto il conto per riconoscerlo
+        z_down = 0
+
         # apri il file ISO
         original_file = open(self.iso_file, 'r')
         # copia il contenuto del file
@@ -356,7 +370,7 @@ class MainWindow(QMainWindow):
                 if x <= self.x_min:
                     self.x_min = x
                 # Aggiorna la x massima se necessario
-                elif x > self.x_max:
+                if x >= self.x_max:
                     self.x_max = x
 
                 # Il terzo elemento è la coordinata Y, parto da 1 per eliminare il carattere Y iniziale
@@ -366,7 +380,7 @@ class MainWindow(QMainWindow):
                 if y <= self.y_min:
                     self.y_min = y
                 # Aggiorna la y massima se necessario
-                elif y > self.y_max:
+                if y >= self.y_max:
                     self.y_max = y
 
                 # Il quarto elemento è la coordinata Z, parto da 1 per eliminare il carattere Z iniziale
@@ -380,7 +394,9 @@ class MainWindow(QMainWindow):
 
             # Righe che iniziano con "G12 X" indicano un riposizionamento sul piano XY
             elif line_of_code.find('G12 X') == 0:
-                # Quando si considerano gli spostamenti non si devono calcolare X e Y min/max
+                # Quando si considerano gli spostamenti si devono calcolare X e Y min/max solo se
+                # è la coordinata di inizio lavorazione (non da dove parte l'utensile, ma il primo punto
+                # su cui si abbassa per iniziare la lavorazione)
                 # altrimenti X e Y min sarebbero sempre 0 visto che ci si muove partendo dall'origine
                 # mentre X e Y max negli spostamenti al più eguagliano i valori
                 # che si hanno durante l'incisione
@@ -393,6 +409,25 @@ class MainWindow(QMainWindow):
 
                 # Prendo la coordinata Y, parto da 1 per eliminare il carattere Y iniziale
                 y = float('{:.3f}'.format(float(subline[2][1:])))
+
+                # Se ci si trova sul primo punto in cui l'utensile si abbassa per lavorare
+                if first_down:
+                    # Aggiorna la x minima se necessario
+                    if x <= self.x_min:
+                        self.x_min = x
+                    # Aggiorna la x massima se necessario
+                    if x >= self.x_max:
+                        self.x_max = x
+
+                    # Aggiorna la y minima se necessario
+                    if y <= self.y_min:
+                        self.y_min = y
+                    # Aggiorna la y massima se necessario
+                    if y >= self.y_max:
+                        self.y_max = y
+
+                    # Resetto la variabile, da ora in poi non si userà più
+                    first_down = False
 
                 # Aggiungo alla lista delle coordinate utili, nella lista sarà sempre preceduta da un "up"
                 coords.append((x, y, 0))
@@ -411,6 +446,14 @@ class MainWindow(QMainWindow):
 
             # Le righe "G12 Z0" indicano il movimento solo verticale dell'utensile per terminare un'incisione
             elif line_of_code.find('G12 Z0') == 0:
+                # Se non sono ancora al secondo G12 Z0
+                if z_down < 2:
+                    # Incrementa il contatore
+                    z_down += 1
+                # Se ho appena trovato il secondo G12 Z0
+                if z_down == 2:
+                    # Imposta il flag a True per indicare che qui si abbasserà l'utensile per la prima volta
+                    first_down = True
 
                 # Riporto l'informazione nella lista delle incisioni, esempio:
                 # G02 X100 Y0 Z-10
@@ -498,11 +541,11 @@ class MainWindow(QMainWindow):
             # Stampa sulla label offset se il disegno è stato spostato,
             # in tal caso vorrebbe dire che ci sono coordinate negative sulla primitiva
             if self.offset_x > 0 and self.offset_y > 0:
-                self.ui.lbl_offset_value.setText('X e Y')
+                self.ui.lbl_offset_value.setText('X - Y')
             elif self.offset_x > 0 and self.offset_y == 0:
-                self.ui.lbl_offset_value.setText('Solo X')
+                self.ui.lbl_offset_value.setText('X')
             elif self.offset_x == 0 and self.offset_y > 0:
-                self.ui.lbl_offset_value.setText('Solo Y')
+                self.ui.lbl_offset_value.setText('Y')
             else:
                 self.ui.lbl_offset_value.setText('No')
 
