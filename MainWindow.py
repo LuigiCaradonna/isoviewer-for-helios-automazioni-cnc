@@ -4,7 +4,7 @@ from UiMainwindow import Ui_MainWindow
 import os.path
 import math
 import time
-from ResetableTimer import ResetableTimer
+from ResettableTimer import ResettableTimer
 
 
 class MyGraphicsScene(QGraphicsScene):
@@ -51,8 +51,12 @@ class MainWindow(QMainWindow):
 
     # Indica se è stata disegnata una primitiva sulla scena
     iso_drawn = False
+    # Indica se è stato avviato il thread del timer
+    timer_running = False
     # Indica se è stato avviato un timer
     timer_started = False
+
+    tmr = None
 
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -89,6 +93,8 @@ class MainWindow(QMainWindow):
         self.ui.lbl_mouse_pos_y.setStyleSheet(
             'background-color: #DDDDDD; border: 1px solid #BBBBBB')
 
+        self.tmr = ResettableTimer(timeout=3, callback=self.draw)
+
     def resizeEvent(self, event):
         '''
         Override del metodo della classe QMainWindow
@@ -97,13 +103,16 @@ class MainWindow(QMainWindow):
         if self.iso_drawn:
             # Se non c'è un timer attivo
             if not self.timer_started:
-                # TODO: Avvia il timer
+                if not self.timer_running:
+                    self.tmr.start()
+                    self.timer_running = True
+                self.tmr.start_timer()
 
                 # Indica che il timer è stato avviato
                 self.timer_started = True
             else:
                 # TODO: Resetta il timer
-                pass
+                self.tmr.restart_timer()
 
         # Quando si ridimensiona la finestra, vanno reimpostate le misure della scena
         self.scene_w, self.scene_h = self.getCanvasSize()
@@ -241,13 +250,17 @@ class MainWindow(QMainWindow):
 
         return scale_x if scale_x <= scale_y else scale_y
 
-    def resetScene(self):
-        '''Reimposta la scena allo stato iniziale'''
+    def resetScene(self, draw=False):
+        '''
+        Reimposta la scena allo stato iniziale
+        Param - boolean draw: se false resetta anche il file selezionato
+        '''
         # Resetta la scena
         self.scene.clear()
         self.scale_factor = 1
-        self.iso_file = ''
-        self.ui.lbl_selected_file.setText('')
+        if not draw:
+            self.iso_file = ''
+            self.ui.lbl_selected_file.setText('')
         # Indica che la scena è vuota
         self.iso_drawn = False
 
@@ -255,7 +268,7 @@ class MainWindow(QMainWindow):
         '''Prepara la scena per contenere il disegno della lavorazione appena elaborata'''
 
         # Resetta la scena
-        self.resetScene()
+        self.resetScene(True)
 
         # Dimensioni indicate per la lastra
         width = float(self.ui.in_width.text())
@@ -437,7 +450,8 @@ class MainWindow(QMainWindow):
         # Se è stato avviato un timer, vuol dire che la funzione
         # è stata chiamata al suo scadere
         if self.timer_started:
-            # TODO: Ferma il timer
+            self.tmr.stop_timer()
+            # self.tmr.terminate()
 
             # Indica che non c'è più un timer attivo
             self.timer_started = False

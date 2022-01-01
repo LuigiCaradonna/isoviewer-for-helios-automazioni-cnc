@@ -1,7 +1,6 @@
 import threading
-import time
 
-class ResetableTimer(threading.Thread):
+class ResettableTimer(threading.Thread):
     def __init__(self, timeout=3, sleep_chunk=0.25, callback=None, *args):
         threading.Thread.__init__(self)
 
