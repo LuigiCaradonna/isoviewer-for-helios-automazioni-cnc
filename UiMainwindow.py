@@ -195,15 +195,6 @@ class Ui_MainWindow(object):
 
         self.gridLayout_5 = QGridLayout()
         self.gridLayout_5.setObjectName(u"gridLayout_5")
-        self.lbl_x_max_2 = QLabel(self.fr_right_col_container)
-        self.lbl_x_max_2.setObjectName(u"lbl_x_max_2")
-        self.lbl_x_max_2.setMinimumSize(QSize(0, 21))
-        self.lbl_x_max_2.setMaximumSize(QSize(16777215, 21))
-        self.lbl_x_max_2.setFont(font1)
-        self.lbl_x_max_2.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
-
-        self.gridLayout_5.addWidget(self.lbl_x_max_2, 0, 1, 1, 1)
-
         self.lbl_x_min_value = QLabel(self.fr_right_col_container)
         self.lbl_x_min_value.setObjectName(u"lbl_x_min_value")
         self.lbl_x_min_value.setMinimumSize(QSize(0, 21))
@@ -213,6 +204,33 @@ class Ui_MainWindow(object):
         self.lbl_x_min_value.setAlignment(Qt.AlignCenter)
 
         self.gridLayout_5.addWidget(self.lbl_x_min_value, 1, 0, 1, 1)
+
+        self.lbl_y_min = QLabel(self.fr_right_col_container)
+        self.lbl_y_min.setObjectName(u"lbl_y_min")
+        self.lbl_y_min.setMinimumSize(QSize(0, 21))
+        self.lbl_y_min.setMaximumSize(QSize(16777215, 21))
+        self.lbl_y_min.setFont(font1)
+        self.lbl_y_min.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
+
+        self.gridLayout_5.addWidget(self.lbl_y_min, 0, 1, 1, 1)
+
+        self.lbl_y_min_value = QLabel(self.fr_right_col_container)
+        self.lbl_y_min_value.setObjectName(u"lbl_y_min_value")
+        self.lbl_y_min_value.setMinimumSize(QSize(0, 21))
+        self.lbl_y_min_value.setMaximumSize(QSize(16777215, 21))
+        self.lbl_y_min_value.setFont(font1)
+        self.lbl_y_min_value.setAlignment(Qt.AlignCenter)
+
+        self.gridLayout_5.addWidget(self.lbl_y_min_value, 1, 1, 1, 1)
+
+        self.lbl_x_min = QLabel(self.fr_right_col_container)
+        self.lbl_x_min.setObjectName(u"lbl_x_min")
+        self.lbl_x_min.setMinimumSize(QSize(0, 21))
+        self.lbl_x_min.setMaximumSize(QSize(16777215, 21))
+        self.lbl_x_min.setFont(font1)
+        self.lbl_x_min.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
+
+        self.gridLayout_5.addWidget(self.lbl_x_min, 0, 0, 1, 1)
 
         self.lbl_y_max = QLabel(self.fr_right_col_container)
         self.lbl_y_max.setObjectName(u"lbl_y_max")
@@ -232,24 +250,6 @@ class Ui_MainWindow(object):
 
         self.gridLayout_5.addWidget(self.lbl_x_max, 2, 0, 1, 1)
 
-        self.lbl_mix_x = QLabel(self.fr_right_col_container)
-        self.lbl_mix_x.setObjectName(u"lbl_mix_x")
-        self.lbl_mix_x.setMinimumSize(QSize(0, 21))
-        self.lbl_mix_x.setMaximumSize(QSize(16777215, 21))
-        self.lbl_mix_x.setFont(font1)
-        self.lbl_mix_x.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
-
-        self.gridLayout_5.addWidget(self.lbl_mix_x, 0, 0, 1, 1)
-
-        self.lbl_y_min_value = QLabel(self.fr_right_col_container)
-        self.lbl_y_min_value.setObjectName(u"lbl_y_min_value")
-        self.lbl_y_min_value.setMinimumSize(QSize(0, 21))
-        self.lbl_y_min_value.setMaximumSize(QSize(16777215, 21))
-        self.lbl_y_min_value.setFont(font1)
-        self.lbl_y_min_value.setAlignment(Qt.AlignCenter)
-
-        self.gridLayout_5.addWidget(self.lbl_y_min_value, 1, 1, 1, 1)
-
         self.lbl_x_max_value = QLabel(self.fr_right_col_container)
         self.lbl_x_max_value.setObjectName(u"lbl_x_max_value")
         self.lbl_x_max_value.setMinimumSize(QSize(0, 21))
@@ -267,6 +267,42 @@ class Ui_MainWindow(object):
         self.lbl_y_max_value.setAlignment(Qt.AlignCenter)
 
         self.gridLayout_5.addWidget(self.lbl_y_max_value, 3, 1, 1, 1)
+
+        self.lbl_z_max = QLabel(self.fr_right_col_container)
+        self.lbl_z_max.setObjectName(u"lbl_z_max")
+        self.lbl_z_max.setMinimumSize(QSize(0, 21))
+        self.lbl_z_max.setMaximumSize(QSize(16777215, 21))
+        self.lbl_z_max.setFont(font1)
+        self.lbl_z_max.setAlignment(Qt.AlignCenter)
+
+        self.gridLayout_5.addWidget(self.lbl_z_max, 4, 0, 1, 1)
+
+        self.lbl_z_max_value = QLabel(self.fr_right_col_container)
+        self.lbl_z_max_value.setObjectName(u"lbl_z_max_value")
+        self.lbl_z_max_value.setMinimumSize(QSize(0, 21))
+        self.lbl_z_max_value.setMaximumSize(QSize(16777215, 21))
+        self.lbl_z_max_value.setFont(font1)
+        self.lbl_z_max_value.setAlignment(Qt.AlignCenter)
+
+        self.gridLayout_5.addWidget(self.lbl_z_max_value, 5, 0, 1, 1)
+
+        self.lbl_offset = QLabel(self.fr_right_col_container)
+        self.lbl_offset.setObjectName(u"lbl_offset")
+        self.lbl_offset.setMinimumSize(QSize(0, 21))
+        self.lbl_offset.setMaximumSize(QSize(16777215, 21))
+        self.lbl_offset.setFont(font1)
+        self.lbl_offset.setAlignment(Qt.AlignCenter)
+
+        self.gridLayout_5.addWidget(self.lbl_offset, 4, 1, 1, 1)
+
+        self.lbl_offset_value = QLabel(self.fr_right_col_container)
+        self.lbl_offset_value.setObjectName(u"lbl_offset_value")
+        self.lbl_offset_value.setMinimumSize(QSize(0, 21))
+        self.lbl_offset_value.setMaximumSize(QSize(16777215, 21))
+        self.lbl_offset_value.setFont(font1)
+        self.lbl_offset_value.setAlignment(Qt.AlignCenter)
+
+        self.gridLayout_5.addWidget(self.lbl_offset_value, 5, 1, 1, 1)
 
 
         self.verticalLayout_5.addLayout(self.gridLayout_5)
@@ -320,8 +356,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.lbl_mmx = QLabel(self.fr_right_col_container)
         self.lbl_mmx.setObjectName(u"lbl_mmx")
-        self.lbl_mmx.setMinimumSize(QSize(30, 0))
-        self.lbl_mmx.setMaximumSize(QSize(30, 16777215))
+        self.lbl_mmx.setMinimumSize(QSize(15, 0))
+        self.lbl_mmx.setMaximumSize(QSize(15, 16777215))
         font2 = QFont()
         font2.setFamilies([u"Courier New"])
         font2.setPointSize(11)
@@ -332,8 +368,8 @@ class Ui_MainWindow(object):
 
         self.lbl_mouse_pos_x = QLabel(self.fr_right_col_container)
         self.lbl_mouse_pos_x.setObjectName(u"lbl_mouse_pos_x")
-        self.lbl_mouse_pos_x.setMinimumSize(QSize(70, 21))
-        self.lbl_mouse_pos_x.setMaximumSize(QSize(70, 21))
+        self.lbl_mouse_pos_x.setMinimumSize(QSize(85, 21))
+        self.lbl_mouse_pos_x.setMaximumSize(QSize(85, 21))
         self.lbl_mouse_pos_x.setFont(font1)
         self.lbl_mouse_pos_x.setAlignment(Qt.AlignCenter)
 
@@ -341,8 +377,8 @@ class Ui_MainWindow(object):
 
         self.lbl_mmy = QLabel(self.fr_right_col_container)
         self.lbl_mmy.setObjectName(u"lbl_mmy")
-        self.lbl_mmy.setMinimumSize(QSize(30, 0))
-        self.lbl_mmy.setMaximumSize(QSize(30, 16777215))
+        self.lbl_mmy.setMinimumSize(QSize(15, 0))
+        self.lbl_mmy.setMaximumSize(QSize(15, 16777215))
         self.lbl_mmy.setFont(font2)
         self.lbl_mmy.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
@@ -350,8 +386,8 @@ class Ui_MainWindow(object):
 
         self.lbl_mouse_pos_y = QLabel(self.fr_right_col_container)
         self.lbl_mouse_pos_y.setObjectName(u"lbl_mouse_pos_y")
-        self.lbl_mouse_pos_y.setMinimumSize(QSize(70, 21))
-        self.lbl_mouse_pos_y.setMaximumSize(QSize(70, 21))
+        self.lbl_mouse_pos_y.setMinimumSize(QSize(85, 21))
+        self.lbl_mouse_pos_y.setMaximumSize(QSize(85, 21))
         self.lbl_mouse_pos_y.setFont(font1)
         self.lbl_mouse_pos_y.setAlignment(Qt.AlignCenter)
 
@@ -396,24 +432,28 @@ class Ui_MainWindow(object):
         self.lbl_height.setText(QCoreApplication.translate("MainWindow", u"A (mm)", None))
         self.in_width.setText(QCoreApplication.translate("MainWindow", u"0", None))
         self.in_height.setText(QCoreApplication.translate("MainWindow", u"0", None))
-        self.lbl_tool_speed.setText(QCoreApplication.translate("MainWindow", u"Velocit\u00e0 utensile", None))
+        self.lbl_tool_speed.setText(QCoreApplication.translate("MainWindow", u"Velocit\u00e0 mm/min", None))
         self.in_tool_speed.setText(QCoreApplication.translate("MainWindow", u"1000", None))
-        self.lbl_x_max_2.setText(QCoreApplication.translate("MainWindow", u"Y min", None))
         self.lbl_x_min_value.setText("")
+        self.lbl_y_min.setText(QCoreApplication.translate("MainWindow", u"Y min", None))
+        self.lbl_y_min_value.setText("")
+        self.lbl_x_min.setText(QCoreApplication.translate("MainWindow", u"X min", None))
         self.lbl_y_max.setText(QCoreApplication.translate("MainWindow", u"Y max", None))
         self.lbl_x_max.setText(QCoreApplication.translate("MainWindow", u"X max", None))
-        self.lbl_mix_x.setText(QCoreApplication.translate("MainWindow", u"X min", None))
-        self.lbl_y_min_value.setText("")
         self.lbl_x_max_value.setText("")
         self.lbl_y_max_value.setText("")
-        self.lbl_rectangle.setText(QCoreApplication.translate("MainWindow", u"Dimensione rettangolo", None))
+        self.lbl_z_max.setText(QCoreApplication.translate("MainWindow", u"Z max", None))
+        self.lbl_z_max_value.setText("")
+        self.lbl_offset.setText(QCoreApplication.translate("MainWindow", u"Offset", None))
+        self.lbl_offset_value.setText("")
+        self.lbl_rectangle.setText(QCoreApplication.translate("MainWindow", u"Ingombro lavorazione", None))
         self.lbl_rectangle_value.setText("")
         self.lbl_working_time.setText(QCoreApplication.translate("MainWindow", u"Tempo stimato", None))
         self.lbl_working_time_value.setText("")
         self.lbl_mouse_pos.setText(QCoreApplication.translate("MainWindow", u"Posizione mouse", None))
-        self.lbl_mmx.setText(QCoreApplication.translate("MainWindow", u"mmX", None))
+        self.lbl_mmx.setText(QCoreApplication.translate("MainWindow", u"X", None))
         self.lbl_mouse_pos_x.setText("")
-        self.lbl_mmy.setText(QCoreApplication.translate("MainWindow", u"mmY", None))
+        self.lbl_mmy.setText(QCoreApplication.translate("MainWindow", u"Y", None))
         self.lbl_mouse_pos_y.setText("")
     # retranslateUi
 

@@ -1,5 +1,6 @@
 import threading
 
+
 class ResettableTimer(threading.Thread):
     def __init__(self, timeout=3, sleep_chunk=0.25, callback=None, *args):
         threading.Thread.__init__(self)
@@ -21,32 +22,34 @@ class ResettableTimer(threading.Thread):
         print('Run timer...')
         while not self.terminate_event.is_set():
             while self.count > 0 and self.start_event.is_set():
-                print (self.count)
-                # time.sleep(self.sleep_chunk)
-                # if self.reset_event.is_set():
-                if self.reset_event.wait(self.sleep_chunk):  # wait for a small chunk of timeout
+                print(self.count)
+                # Wait for a small chunk of timeout
+                if self.reset_event.wait(self.sleep_chunk):
                     self.reset_event.clear()
-                    self.count = self.timeout/self.sleep_chunk  # reset
+                    # Reset the timeout
+                    self.count = self.timeout/self.sleep_chunk
                 self.count -= 1
             if self.count <= 0:
-                self.start_event.clear()
-                print ('Timeout. Calling function...')
+                # Stop the timer
+                self.stop_timer()
+                self.terminate()
+                print('Timeout: calling function...')
                 self.callback(*self.callback_args)
-                self.count = self.timeout/self.sleep_chunk  #reset
 
         print('Exit while loop')
 
     def start_timer(self):
         self.start_event.set()
+        self.terminate_event.clear()
         print('Start timer...')
 
     def stop_timer(self):
         self.start_event.clear()
-        self.count = self.timeout / self.sleep_chunk  # reset
+        self.count = self.timeout / self.sleep_chunk
         print('Stop timer...')
 
     def restart_timer(self):
-        # reset only if timer is running. otherwise start timer afresh
+        # Reset only if timer is running. otherwise start timer afresh
         if self.start_event.is_set():
             self.reset_event.set()
             print('Reset timer...')

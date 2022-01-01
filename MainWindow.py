@@ -37,7 +37,7 @@ class MainWindow(QMainWindow):
     # Posizioni minime e massime della lavorazione
     x_min = 10000
     y_min = 10000
-    z_min = 0
+    z_max = 0
     x_max = 0
     y_max = 0
 
@@ -84,6 +84,8 @@ class MainWindow(QMainWindow):
             'background-color: #DDDDDD; border: 1px solid #BBBBBB')
         self.ui.lbl_y_max_value.setStyleSheet(
             'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+        self.ui.lbl_z_max_value.setStyleSheet(
+            'background-color: #DDDDDD; border: 1px solid #BBBBBB')
         self.ui.lbl_rectangle_value.setStyleSheet(
             'background-color: #DDDDDD; border: 1px solid #BBBBBB')
         self.ui.lbl_working_time_value.setStyleSheet(
@@ -91,6 +93,8 @@ class MainWindow(QMainWindow):
         self.ui.lbl_mouse_pos_x.setStyleSheet(
             'background-color: #DDDDDD; border: 1px solid #BBBBBB')
         self.ui.lbl_mouse_pos_y.setStyleSheet(
+            'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+        self.ui.lbl_offset_value.setStyleSheet(
             'background-color: #DDDDDD; border: 1px solid #BBBBBB')
 
         self.tmr = ResettableTimer(timeout=3, callback=self.draw)
@@ -148,7 +152,7 @@ class MainWindow(QMainWindow):
         '''Resetta le posizioni minime e massime della lavorazione'''
         self.x_min = 10000
         self.y_min = 10000
-        self.z_min = 0
+        self.z_max = 0
         self.x_max = 0
         self.y_max = 0
         self.offset_x = 0
@@ -183,8 +187,10 @@ class MainWindow(QMainWindow):
             with open(self.iso_file) as f:
                 # Se non inizia con "QUOTE RELATIVE"
                 if f.readline().rstrip() != 'QUOTE RELATIVE':
-                    self.ui.lbl_selected_file.setStyleSheet("border: 1px solid red")
-                    self.ui.statusbar.showMessage('Indicare un file ISO valido')
+                    self.ui.lbl_selected_file.setStyleSheet(
+                        "border: 1px solid red")
+                    self.ui.statusbar.showMessage(
+                        'Indicare un file ISO valido')
                     return False
 
         # Se il campo width è vuoto, impostalo a 0
@@ -366,8 +372,8 @@ class MainWindow(QMainWindow):
                 # Il quarto elemento è la coordinata Z, parto da 1 per eliminare il carattere Z iniziale
                 z = float('{:.3f}'.format(float(subline[3][1:])))
                 # Aggiorna la z massima se necessario
-                if z < self.z_min:
-                    self.z_min = z
+                if z < self.z_max:
+                    self.z_max = z
 
                 # Aggiungo alla lista delle coordinate utili
                 coords.append((x, y, z))
@@ -460,9 +466,9 @@ class MainWindow(QMainWindow):
     def mousePosition(self, pos):
         '''Mostra sull'interfaccia le coordinate del puntatore del mouse adeguate al fattore di scala in uso'''
         self.ui.lbl_mouse_pos_x.setText(
-            str(int(pos.x() * (1/self.scale_factor))))
+            str('{:.1f}'.format(float(pos.x() * (1/self.scale_factor)))))
         self.ui.lbl_mouse_pos_y.setText(
-            str(int((self.scene_h - pos.y()) * (1/self.scale_factor))))
+            str('{:.1f}'.format(float((self.scene_h - pos.y()) * (1/self.scale_factor)))))
 
         # print('x: ' + str(int(pos.x())) + ' | y: ' + str(int(pos.y())))
 
@@ -472,10 +478,6 @@ class MainWindow(QMainWindow):
         # Se è stato avviato un timer, vuol dire che la funzione
         # è stata chiamata al suo scadere
         if self.timer_started:
-            # Ferma il timer
-            self.tmr.stop_timer()
-            self.tmr.terminate()
-
             # Indica che non c'è più un timer attivo
             self.timer_started = False
 
@@ -486,11 +488,23 @@ class MainWindow(QMainWindow):
             num_coords = len(coords)
             self.setScene()
 
-            # Limita il valore a 3 decimali
+            # Limita il valore a 3 decimali e stampa il valore sulla label corrispondente
             self.ui.lbl_x_min_value.setText('{:.3f}'.format(self.x_min))
             self.ui.lbl_x_max_value.setText('{:.3f}'.format(self.x_max))
             self.ui.lbl_y_min_value.setText('{:.3f}'.format(self.y_min))
             self.ui.lbl_y_max_value.setText('{:.3f}'.format(self.y_max))
+            self.ui.lbl_z_max_value.setText('{:.3f}'.format(self.z_max))
+
+            # Stampa sulla label offset se il disegno è stato spostato,
+            # in tal caso vorrebbe dire che ci sono coordinate negative sulla primitiva
+            if self.offset_x > 0 and self.offset_y > 0:
+                self.ui.lbl_offset_value.setText('X e Y')
+            elif self.offset_x > 0 and self.offset_y == 0:
+                self.ui.lbl_offset_value.setText('Solo X')
+            elif self.offset_x == 0 and self.offset_y > 0:
+                self.ui.lbl_offset_value.setText('Solo Y')
+            else:
+                self.ui.lbl_offset_value.setText('No')
 
             # Ingombro della lavorazione
             drawing_w = self.x_max - self.x_min
