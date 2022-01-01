@@ -95,24 +95,37 @@ class MainWindow(QMainWindow):
 
         self.tmr = ResettableTimer(timeout=3, callback=self.draw)
 
+    def timerManager(self):
+        # Se il thread del timer non è ancora stato avviato
+        if not self.timer_running:
+            # Avvia il thread
+            self.tmr.start()
+            # Indica che il thread è attivo
+            self.timer_running = True
+            # Avvia il timer
+            self.tmr.start_timer()
+            # Indica che il timer è stato avviato
+            self.timer_started = True
+        # Il thread è attivo, ma se non c'è un timer attivo
+        elif not self.timer_started:
+            # Avvia il timer
+            self.tmr.start_timer()
+
+            # Indica che il timer è stato avviato
+            self.timer_started = True
+        # Se sia il thread che il timer sono attivi
+        else:
+            # Resetta il timer
+            self.tmr.restart_timer()
+
     def resizeEvent(self, event):
         '''
         Override del metodo della classe QMainWindow
         '''
         # Se c'è qualcosa sulla scena
         if self.iso_drawn:
-            # Se non c'è un timer attivo
-            if not self.timer_started:
-                if not self.timer_running:
-                    self.tmr.start()
-                    self.timer_running = True
-                self.tmr.start_timer()
-
-                # Indica che il timer è stato avviato
-                self.timer_started = True
-            else:
-                # TODO: Resetta il timer
-                self.tmr.restart_timer()
+            # Gestisci il timer che invocherà la rigenerazione del disegno
+            self.timerManager()
 
         # Quando si ridimensiona la finestra, vanno reimpostate le misure della scena
         self.scene_w, self.scene_h = self.getCanvasSize()
@@ -138,6 +151,8 @@ class MainWindow(QMainWindow):
         self.z_min = 0
         self.x_max = 0
         self.y_max = 0
+        self.offset_x = 0
+        self.offset_y = 0
 
     def browseFile(self):
         '''Apre la finestra di dialogo per la scelta del file iso'''
@@ -318,6 +333,7 @@ class MainWindow(QMainWindow):
 
         # Resetta i valori massimi e minimi delle coordinate
         self.resetCoordinatesLimits()
+        # Lista di coordinate ed indicazioni di movimento per disegnare il percorso dell'utensile
         coords = []
 
         # Cicla su tutte le righe del file
@@ -404,24 +420,31 @@ class MainWindow(QMainWindow):
                 # nello specifico sarà il valore assoluto dell'ultima quota Z
                 coords.append(('up', 0, 0))
 
-        # controlla se la x e/o la y in qualche punto diventano negative e riporta tutto in area positiva
+        # Controlla se la x e/o la y in qualche punto diventano negative e riporta tutto in area positiva
         # altrimenti non sarà possibile la visualizzazione visto che il canvas accetta solo
         # coordinate positive
         if self.x_min < 0:
-            self.offset_x = -self.x_min
+            self.offset_x = abs(self.x_min)
+            self.x_min = 0
+            self.x_max += self.offset_x
 
         if self.y_min < 0:
-            self.offset_y = -self.y_min
+            self.offset_y = abs(self.y_min)
+            self.y_min = 0
+            self.y_max += self.offset_y
 
-        # se almeno uno degli offset è stato impostato
+        # Se almeno uno degli offset è stato impostato
         if self.offset_x > 0 or self.offset_y > 0:
             num_coords = len(coords)
 
-            # per ogni entry della lista delle coordinate
+            # Per ogni entry della lista delle coordinate
             for i in range(num_coords-1):
-                # addiziona gli offset per portare il disegno in area positiva
-                coords[i][0] = coords[i][0] + self.offset_x
-                coords[i][1] = coords[i][1] + self.offset_y
+                # Se la tupla corrente non contiene indicazioni di movimento
+                if coords[i][0] != 'up' and coords[i][0] != 'down':
+                    # Addiziona gli offset per portare il disegno in area positiva, la z resta invariata
+                    new_x = float(coords[i][0]) + self.offset_x
+                    new_y = float(coords[i][1]) + self.offset_y
+                    coords[i] = (new_x, new_y, coords[i][2])
 
         return coords
 
@@ -446,12 +469,12 @@ class MainWindow(QMainWindow):
     def draw(self):
         '''Traccia il disegno della lavorazione'''
 
-        # Per quando sarà disponibile il timer
         # Se è stato avviato un timer, vuol dire che la funzione
         # è stata chiamata al suo scadere
         if self.timer_started:
+            # Ferma il timer
             self.tmr.stop_timer()
-            # self.tmr.terminate()
+            self.tmr.terminate()
 
             # Indica che non c'è più un timer attivo
             self.timer_started = False
