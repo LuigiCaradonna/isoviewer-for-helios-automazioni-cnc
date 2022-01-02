@@ -1,4 +1,4 @@
-from PySide6 import QtCore
+from PySide6 import (QtCore, QtGui)
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QGraphicsScene
 from UiMainwindow import Ui_MainWindow
 import os.path
@@ -57,6 +57,8 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        self.setWindowIcon(QtGui.QIcon('favicon.png'))
 
         self.ui.btn_draw.clicked.connect(self.draw)
         self.ui.btn_reset.clicked.connect(self.resetScene)
@@ -159,8 +161,18 @@ class MainWindow(QMainWindow):
 
     def browseFile(self):
         '''Apre la finestra di dialogo per la scelta del file iso'''
-        self.iso_file, _ = QFileDialog.getOpenFileName(self, 'OpenFile')
-        self.ui.lbl_selected_file.setText(self.iso_file)
+        # Filtro per mostrare nella finestra solo file con estensione PGR
+        filter = "pgr(*.PGR)"
+        # Permetto la selezione di più file
+        self.iso_file, _ = QFileDialog.getOpenFileNames(self, 'OpenFile', filter=filter)
+        
+        # Stringa da stampare sulla label dei file selezionati
+        file_output = ''
+        for file in self.iso_file:
+            filename = os.path.basename(file)
+            file_output += '"' + filename + '" '
+
+        self.ui.lbl_selected_file.setText(file_output)
 
     def resetErrors(self):
         '''
@@ -176,21 +188,22 @@ class MainWindow(QMainWindow):
     def checkData(self):
         '''Valida i dati immessi prima di elaborare il file iso'''
 
-        # Verifica se il file indicato esiste e se è un file PGR
-        if not os.path.isfile(self.iso_file) or not self.iso_file[-3:] == 'PGR':
-            self.ui.lbl_selected_file.setStyleSheet("border: 1px solid red")
-            self.ui.statusbar.showMessage('Indicare un file ISO valido')
-            return False
-        # Se il file indicato esiste ed ha estensione PGR
-        else:
-            with open(self.iso_file) as f:
-                # Se non inizia con "QUOTE RELATIVE"
-                if f.readline().rstrip() != 'QUOTE RELATIVE':
-                    self.ui.lbl_selected_file.setStyleSheet(
-                        "border: 1px solid red")
-                    self.ui.statusbar.showMessage(
-                        'Indicare un file ISO valido')
-                    return False
+        for file in self.iso_file:
+            # Verifica se il file indicato esiste e se è un file PGR
+            if not os.path.isfile(file) or not file[-3:] == 'PGR':
+                self.ui.lbl_selected_file.setStyleSheet("border: 1px solid red")
+                self.ui.statusbar.showMessage('Selezionare solo file ISO validi')
+                return False
+            # Se il file indicato esiste ed ha estensione PGR
+            else:
+                with open(file) as f:
+                    # Se non inizia con "QUOTE RELATIVE"
+                    if f.readline().rstrip() != 'QUOTE RELATIVE':
+                        self.ui.lbl_selected_file.setStyleSheet(
+                            "border: 1px solid red")
+                        self.ui.statusbar.showMessage(
+                            'Selezionare solo file ISO validi')
+                        return False
 
         # Se il campo width è vuoto, impostalo a 0
         if self.ui.in_width.text() == '':
@@ -337,86 +350,45 @@ class MainWindow(QMainWindow):
 
     def getCoordinates(self):
         '''Legge il file iso ed estrapola coordinate e dati utili al tracciamento del disegno della lavorazione'''
-        # Indica se ci si trova sul primo punto in cui l'utensile si abbassa per la lavorazione
-        first_down = False
-        # Il posizionamento per il punto su cui si inizia a lavorare è dopo il secondo G12 Z0
-        # in questa variabile porto il conto per riconoscerlo
-        z_down = 0
-
-        # apri il file ISO
-        original_file = open(self.iso_file, 'r')
-        # copia il contenuto del file
-        iso = original_file.readlines()
-        # chiudi il file
-        original_file.close()
-
+        
         # Resetta i valori massimi e minimi delle coordinate
         self.resetCoordinatesLimits()
         # Lista di coordinate ed indicazioni di movimento per disegnare il percorso dell'utensile
         coords = []
 
-        # Cicla su tutte le righe del file
-        for line_of_code in iso:
-            # Righe che iniziano con "G02 X" indicano posizioni che producono incisioni - Es.: G02 X508 Y556 Z-13
-            if line_of_code.find('G02 X') == 0:
-                # Dividi la riga di codice
-                subline = line_of_code.split(' ')
+        for file in self.iso_file:
+            # Indica se ci si trova sul primo punto in cui l'utensile si abbassa per la lavorazione
+            first_down = False
+            # Il posizionamento per il punto su cui si inizia a lavorare è dopo il secondo G12 Z0
+            # in questa variabile porto il conto per riconoscerlo
+            z_down = 0
 
-                # Il secondo elemento è la coordinata X, parto da 1 per eliminare il carattere X iniziale
-                x = float('{:.3f}'.format(float(subline[1][1:])))
+            # apri il file ISO
+            original_file = open(file, 'r')
+            # copia il contenuto del file
+            iso = original_file.readlines()
+            # chiudi il file
+            original_file.close()
 
-                # Aggiorna la x minima se necessario
-                if x <= self.x_min:
-                    self.x_min = x
-                # Aggiorna la x massima se necessario
-                if x >= self.x_max:
-                    self.x_max = x
+            # Cicla su tutte le righe del file
+            for line_of_code in iso:
+                # Righe che iniziano con "G02 X" indicano posizioni che producono incisioni - Es.: G02 X508 Y556 Z-13
+                if line_of_code.find('G02 X') == 0:
+                    # Dividi la riga di codice
+                    subline = line_of_code.split(' ')
 
-                # Il terzo elemento è la coordinata Y, parto da 1 per eliminare il carattere Y iniziale
-                y = float('{:.3f}'.format(float(subline[2][1:])))
+                    # Il secondo elemento è la coordinata X, parto da 1 per eliminare il carattere X iniziale
+                    x = float('{:.3f}'.format(float(subline[1][1:])))
 
-                # Aggiorna la y minima se necessario
-                if y <= self.y_min:
-                    self.y_min = y
-                # Aggiorna la y massima se necessario
-                if y >= self.y_max:
-                    self.y_max = y
-
-                # Il quarto elemento è la coordinata Z, parto da 1 per eliminare il carattere Z iniziale
-                z = float('{:.3f}'.format(float(subline[3][1:])))
-                # Aggiorna la z massima se necessario
-                if z < self.z_max:
-                    self.z_max = z
-
-                # Aggiungo alla lista delle coordinate utili
-                coords.append((x, y, z))
-
-            # Righe che iniziano con "G12 X" indicano un riposizionamento sul piano XY
-            elif line_of_code.find('G12 X') == 0:
-                # Quando si considerano gli spostamenti si devono calcolare X e Y min/max solo se
-                # è la coordinata di inizio lavorazione (non da dove parte l'utensile, ma il primo punto
-                # su cui si abbassa per iniziare la lavorazione)
-                # altrimenti X e Y min sarebbero sempre 0 visto che ci si muove partendo dall'origine
-                # mentre X e Y max negli spostamenti al più eguagliano i valori
-                # che si hanno durante l'incisione
-
-                # Dividi la riga di codice
-                subline = line_of_code.split(' ')
-
-                # Prendo la coordinata X, parto da 1 per eliminare il carattere X iniziale
-                x = float('{:.3f}'.format(float(subline[1][1:])))
-
-                # Prendo la coordinata Y, parto da 1 per eliminare il carattere Y iniziale
-                y = float('{:.3f}'.format(float(subline[2][1:])))
-
-                # Se ci si trova sul primo punto in cui l'utensile si abbassa per lavorare
-                if first_down:
                     # Aggiorna la x minima se necessario
                     if x <= self.x_min:
                         self.x_min = x
                     # Aggiorna la x massima se necessario
                     if x >= self.x_max:
                         self.x_max = x
+
+                    # Il terzo elemento è la coordinata Y, parto da 1 per eliminare il carattere Y iniziale
+                    y = float('{:.3f}'.format(float(subline[2][1:])))
 
                     # Aggiorna la y minima se necessario
                     if y <= self.y_min:
@@ -425,48 +397,91 @@ class MainWindow(QMainWindow):
                     if y >= self.y_max:
                         self.y_max = y
 
-                    # Resetto la variabile, da ora in poi non si userà più
-                    first_down = False
+                    # Il quarto elemento è la coordinata Z, parto da 1 per eliminare il carattere Z iniziale
+                    z = float('{:.3f}'.format(float(subline[3][1:])))
+                    # Aggiorna la z massima se necessario
+                    if z < self.z_max:
+                        self.z_max = z
 
-                # Aggiungo alla lista delle coordinate utili, nella lista sarà sempre preceduta da un "up"
-                coords.append((x, y, 0))
+                    # Aggiungo alla lista delle coordinate utili
+                    coords.append((x, y, z))
 
-            # Le righe "G02 Z" indicano il movimento solo verticale dell'utensile per iniziare un'incisione
-            elif line_of_code.find('G02 Z') == 0:
-                # Dividi la riga di codice
-                subline = line_of_code.split(' ')
+                # Righe che iniziano con "G12 X" indicano un riposizionamento sul piano XY
+                elif line_of_code.find('G12 X') == 0:
+                    # Quando si considerano gli spostamenti si devono calcolare X e Y min/max solo se
+                    # è la coordinata di inizio lavorazione (non da dove parte l'utensile, ma il primo punto
+                    # su cui si abbassa per iniziare la lavorazione)
+                    # altrimenti X e Y min sarebbero sempre 0 visto che ci si muove partendo dall'origine
+                    # mentre X e Y max negli spostamenti al più eguagliano i valori
+                    # che si hanno durante l'incisione
 
-                # Indico che la prossima coordinata sarà la discesa dell'utensile
-                coords.append(('down', 0, 0))
+                    # Dividi la riga di codice
+                    subline = line_of_code.split(' ')
 
-                # Riporto di quanto si abbassa l'utensile
-                coords.append(
-                    (0, 0, float('{:.3f}'.format(float(subline[1][1:])))))
+                    # Prendo la coordinata X, parto da 1 per eliminare il carattere X iniziale
+                    x = float('{:.3f}'.format(float(subline[1][1:])))
 
-            # Le righe "G12 Z0" indicano il movimento solo verticale dell'utensile per terminare un'incisione
-            elif line_of_code.find('G12 Z0') == 0:
-                # Se non sono ancora al secondo G12 Z0
-                if z_down < 2:
-                    # Incrementa il contatore
-                    z_down += 1
-                # Se ho appena trovato il secondo G12 Z0
-                if z_down == 2:
-                    # Imposta il flag a True per indicare che qui si abbasserà l'utensile per la prima volta
-                    first_down = True
+                    # Prendo la coordinata Y, parto da 1 per eliminare il carattere Y iniziale
+                    y = float('{:.3f}'.format(float(subline[2][1:])))
 
-                # Riporto l'informazione nella lista delle incisioni, esempio:
-                # G02 X100 Y0 Z-10
-                # G02 X0 Y0 Z-10
-                # G12 Z0
-                # G12 X150 Y100
-                # G02 Z-10
-                # G02 X150 Y200 Z-10
-                # In questo caso, nella lista delle coordinate per le incisioni ci sarebbero
-                # ((100, 0), (0, 0), (150, 100))
-                # ma la linea da (0, 0) a (150, 100) non è da disegnare, quindi "up" indicherà questa situazione.
-                # Inoltre quando si incontra un "up" si dovrà leggere l'ultima quota Z per sapere di quanto si alza l'utensile
-                # nello specifico sarà il valore assoluto dell'ultima quota Z
-                coords.append(('up', 0, 0))
+                    # Se ci si trova sul primo punto in cui l'utensile si abbassa per lavorare
+                    if first_down:
+                        # Aggiorna la x minima se necessario
+                        if x <= self.x_min:
+                            self.x_min = x
+                        # Aggiorna la x massima se necessario
+                        if x >= self.x_max:
+                            self.x_max = x
+
+                        # Aggiorna la y minima se necessario
+                        if y <= self.y_min:
+                            self.y_min = y
+                        # Aggiorna la y massima se necessario
+                        if y >= self.y_max:
+                            self.y_max = y
+
+                        # Resetto la variabile, da ora in poi non si userà più
+                        first_down = False
+
+                    # Aggiungo alla lista delle coordinate utili, nella lista sarà sempre preceduta da un "up"
+                    coords.append((x, y, 0))
+
+                # Le righe "G02 Z" indicano il movimento solo verticale dell'utensile per iniziare un'incisione
+                elif line_of_code.find('G02 Z') == 0:
+                    # Dividi la riga di codice
+                    subline = line_of_code.split(' ')
+
+                    # Indico che la prossima coordinata sarà la discesa dell'utensile
+                    coords.append(('down', 0, 0))
+
+                    # Riporto di quanto si abbassa l'utensile
+                    coords.append(
+                        (0, 0, float('{:.3f}'.format(float(subline[1][1:])))))
+
+                # Le righe "G12 Z0" indicano il movimento solo verticale dell'utensile per terminare un'incisione
+                elif line_of_code.find('G12 Z0') == 0:
+                    # Se non sono ancora al secondo G12 Z0
+                    if z_down < 2:
+                        # Incrementa il contatore
+                        z_down += 1
+                    # Se ho appena trovato il secondo G12 Z0
+                    if z_down == 2:
+                        # Imposta il flag a True per indicare che qui si abbasserà l'utensile per la prima volta
+                        first_down = True
+
+                    # Riporto l'informazione nella lista delle incisioni, esempio:
+                    # G02 X100 Y0 Z-10
+                    # G02 X0 Y0 Z-10
+                    # G12 Z0
+                    # G12 X150 Y100
+                    # G02 Z-10
+                    # G02 X150 Y200 Z-10
+                    # In questo caso, nella lista delle coordinate per le incisioni ci sarebbero
+                    # ((100, 0), (0, 0), (150, 100))
+                    # ma la linea da (0, 0) a (150, 100) non è da disegnare, quindi "up" indicherà questa situazione.
+                    # Inoltre quando si incontra un "up" si dovrà leggere l'ultima quota Z per sapere di quanto si alza l'utensile
+                    # nello specifico sarà il valore assoluto dell'ultima quota Z
+                    coords.append(('up', 0, 0))
 
         # Controlla se la x e/o la y in qualche punto diventano negative e riporta tutto in area positiva
         # altrimenti non sarà possibile la visualizzazione visto che il canvas accetta solo
