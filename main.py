@@ -9,5 +9,3 @@ if __name__ == "__main__":
     window.show()
 
     sys.exit(app.exec())
-
-# pyside6-uic ISOViewerMainWindow.ui > UiMainwindow.py
