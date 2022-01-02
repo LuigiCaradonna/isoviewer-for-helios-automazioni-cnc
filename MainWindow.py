@@ -1,10 +1,9 @@
-from PySide6 import (QtCore)
+from PySide6 import QtCore
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QGraphicsScene
 from UiMainwindow import Ui_MainWindow
 import os.path
 import math
 import time
-from ResettableTimer import ResettableTimer
 
 
 class MyGraphicsScene(QGraphicsScene):
@@ -37,9 +36,9 @@ class MainWindow(QMainWindow):
     # Posizioni minime e massime della lavorazione
     x_min = 10000
     y_min = 10000
-    z_max = 0
     x_max = 0
     y_max = 0
+    z_max = 0
 
     # Da aggiornare ad ogni tracciamento di una linea, servirà per calcolare di quanto
     # si alza l'utensile quando si deve staccare dal piano di incisione
@@ -51,12 +50,8 @@ class MainWindow(QMainWindow):
 
     # Indica se è stata disegnata una primitiva sulla scena
     iso_drawn = False
-    # Indica se è stato avviato il thread del timer
-    timer_running = False
-    # Indica se è stato avviato un timer
-    timer_started = False
-
-    tmr = None
+    # Indica se il timer per ritardare la rigenerazione del disegno è attivo
+    resize_timer_running = False
 
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -96,43 +91,47 @@ class MainWindow(QMainWindow):
             'background-color: #DDDDDD; border: 1px solid #BBBBBB')
         self.ui.lbl_offset_value.setStyleSheet(
             'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+        # In questo modo risulta centrato nello spazio a sua disposizione
+        self.ui.chk_autoresize.setStyleSheet("padding-left:20px")
 
-        self.tmr = ResettableTimer(timeout=3, callback=self.draw)
-
-    def timerManager(self):
-        # Se il thread del timer non è ancora stato avviato
-        if not self.timer_running:
-            # Avvia il thread
-            self.tmr.start()
-            # Indica che il thread è attivo
-            self.timer_running = True
-            # Avvia il timer
-            self.tmr.start_timer()
-            # Indica che il timer è stato avviato
-            self.timer_started = True
-        # Il thread è attivo, ma se non c'è un timer attivo
-        elif not self.timer_started:
-            # Avvia il timer
-            self.tmr.start_timer()
-
-            # Indica che il timer è stato avviato
-            self.timer_started = True
-        # Se sia il thread che il timer sono attivi
-        else:
-            # Resetta il timer
-            self.tmr.restart_timer()
+        # Timer per gestire il ritardo nella rigenerazione del tracciato
+        # a seguito del ridimensionamento della scena
+        self._resize_timer = QtCore.QTimer(self)
+        # Imposta il timer per un solo conteggio.
+        # Non uso direttamente un timer singeShot perché non permette l'uso dello stop
+        # necessario a simulare il reset implementato nel metodo resizeEvent()
+        self._resize_timer.setSingleShot(True)
+        self._resize_timer.timeout.connect(self.draw)
+        # Indica se il timer va usato oppure no
+        self.delayEnabled = True
+        # Ritardo in millisecondi
+        self.delayTimeout = 100
 
     def resizeEvent(self, event):
         '''
         Override del metodo della classe QMainWindow
         '''
-        # Se c'è qualcosa sulla scena
-        if self.iso_drawn:
-            # Gestisci il timer che invocherà la rigenerazione del disegno
-            self.timerManager()
-
         # Quando si ridimensiona la finestra, vanno reimpostate le misure della scena
         self.scene_w, self.scene_h = self.getCanvasSize()
+
+        # Se c'è qualcosa sulla scena ed è abilitato l'auto-resize
+        if self.iso_drawn and self.ui.chk_autoresize.isChecked():
+            # Se è abilitato il timer per la rigenerazione del tracciato
+            if self.delayEnabled:
+                # Se il timer è stato avviato
+                if self.resize_timer_running:
+                    # Ferma il timer perché ancora si sta ridimensionando la finestra
+                    self._resize_timer.stop()
+                    # Indica che il timer non è più attivo
+                    self.resize_timer_running = False
+
+                # Avvia il timer
+                self._resize_timer.start(self.delayTimeout)
+                # Indica che il timer è attivo
+                self.resize_timer_running = True
+            else:
+                # Avvia direttamente la rigenerazione del disegno
+                self.draw()
 
     def showEvent(self, event):
         '''
@@ -518,12 +517,6 @@ class MainWindow(QMainWindow):
     def draw(self):
         '''Traccia il disegno della lavorazione'''
 
-        # Se è stato avviato un timer, vuol dire che la funzione
-        # è stata chiamata al suo scadere
-        if self.timer_started:
-            # Indica che non c'è più un timer attivo
-            self.timer_started = False
-
         self.resetErrors()
 
         if self.checkData():
@@ -702,3 +695,9 @@ class MainWindow(QMainWindow):
             self.iso_drawn = True
             # Calcolo la stima del tempo di lavorazione
             self.workingTime(engraving_dst, positioning_dst)
+
+            # Se il flag è impostato su True, vuol dire che è stato rigenerato il disegno
+            # a seguito del ridimensionamento della finestra
+            if self.resize_timer_running:
+                # Indica che il timer ha finito il conteggio
+                self.resize_timer_running = False

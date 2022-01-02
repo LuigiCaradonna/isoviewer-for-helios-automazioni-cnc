@@ -15,10 +15,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QFrame, QGraphicsView, QGridLayout,
-    QHBoxLayout, QLabel, QLineEdit, QMainWindow,
-    QMenuBar, QPushButton, QSizePolicy, QSpacerItem,
-    QStatusBar, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QFrame, QGraphicsView,
+    QGridLayout, QHBoxLayout, QLabel, QLineEdit,
+    QMainWindow, QMenuBar, QPushButton, QSizePolicy,
+    QSpacerItem, QStatusBar, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -49,9 +49,10 @@ class Ui_MainWindow(object):
         self.frame.setFrameShadow(QFrame.Raised)
         self.gridLayout_3 = QGridLayout(self.frame)
         self.gridLayout_3.setObjectName(u"gridLayout_3")
-        self.gridLayout_3.setContentsMargins(0, 0, 3, 0)
+        self.gridLayout_3.setContentsMargins(0, 0, 0, 0)
         self.canvas = QGraphicsView(self.frame)
         self.canvas.setObjectName(u"canvas")
+        self.canvas.viewport().setProperty("cursor", QCursor(Qt.ArrowCursor))
         self.canvas.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.canvas.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
@@ -131,15 +132,6 @@ class Ui_MainWindow(object):
 
         self.gridLayout_4 = QGridLayout()
         self.gridLayout_4.setObjectName(u"gridLayout_4")
-        self.lbl_width = QLabel(self.fr_right_col_container)
-        self.lbl_width.setObjectName(u"lbl_width")
-        self.lbl_width.setMinimumSize(QSize(0, 21))
-        self.lbl_width.setMaximumSize(QSize(16777215, 21))
-        self.lbl_width.setFont(font1)
-        self.lbl_width.setAlignment(Qt.AlignCenter)
-
-        self.gridLayout_4.addWidget(self.lbl_width, 0, 0, 1, 1)
-
         self.lbl_height = QLabel(self.fr_right_col_container)
         self.lbl_height.setObjectName(u"lbl_height")
         self.lbl_height.setMinimumSize(QSize(0, 21))
@@ -151,47 +143,63 @@ class Ui_MainWindow(object):
 
         self.in_width = QLineEdit(self.fr_right_col_container)
         self.in_width.setObjectName(u"in_width")
-        self.in_width.setMinimumSize(QSize(0, 31))
-        self.in_width.setMaximumSize(QSize(16777215, 31))
-        self.in_width.setFont(font)
+        self.in_width.setMinimumSize(QSize(0, 25))
+        self.in_width.setMaximumSize(QSize(16777215, 25))
+        font2 = QFont()
+        font2.setPointSize(12)
+        self.in_width.setFont(font2)
         self.in_width.setAlignment(Qt.AlignCenter)
 
         self.gridLayout_4.addWidget(self.in_width, 1, 0, 1, 1)
 
+        self.lbl_width = QLabel(self.fr_right_col_container)
+        self.lbl_width.setObjectName(u"lbl_width")
+        self.lbl_width.setMinimumSize(QSize(0, 21))
+        self.lbl_width.setMaximumSize(QSize(16777215, 21))
+        self.lbl_width.setFont(font1)
+        self.lbl_width.setAlignment(Qt.AlignCenter)
+
+        self.gridLayout_4.addWidget(self.lbl_width, 0, 0, 1, 1)
+
         self.in_height = QLineEdit(self.fr_right_col_container)
         self.in_height.setObjectName(u"in_height")
-        self.in_height.setMinimumSize(QSize(0, 31))
-        self.in_height.setMaximumSize(QSize(16777215, 31))
-        self.in_height.setFont(font)
+        self.in_height.setMinimumSize(QSize(0, 25))
+        self.in_height.setMaximumSize(QSize(16777215, 25))
+        self.in_height.setFont(font2)
         self.in_height.setAlignment(Qt.AlignCenter)
 
         self.gridLayout_4.addWidget(self.in_height, 1, 1, 1, 1)
 
-
-        self.verticalLayout_5.addLayout(self.gridLayout_4)
-
-        self.verticalLayout_4 = QVBoxLayout()
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.lbl_tool_speed = QLabel(self.fr_right_col_container)
         self.lbl_tool_speed.setObjectName(u"lbl_tool_speed")
-        self.lbl_tool_speed.setMinimumSize(QSize(0, 31))
+        self.lbl_tool_speed.setMinimumSize(QSize(0, 21))
         self.lbl_tool_speed.setMaximumSize(QSize(16777215, 21))
         self.lbl_tool_speed.setFont(font1)
         self.lbl_tool_speed.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
 
-        self.verticalLayout_4.addWidget(self.lbl_tool_speed)
+        self.gridLayout_4.addWidget(self.lbl_tool_speed, 2, 0, 1, 1)
 
         self.in_tool_speed = QLineEdit(self.fr_right_col_container)
         self.in_tool_speed.setObjectName(u"in_tool_speed")
-        self.in_tool_speed.setMinimumSize(QSize(0, 31))
-        self.in_tool_speed.setMaximumSize(QSize(16777215, 31))
-        self.in_tool_speed.setFont(font)
+        self.in_tool_speed.setMinimumSize(QSize(0, 25))
+        self.in_tool_speed.setMaximumSize(QSize(16777215, 25))
+        self.in_tool_speed.setFont(font2)
         self.in_tool_speed.setAlignment(Qt.AlignCenter)
 
-        self.verticalLayout_4.addWidget(self.in_tool_speed)
+        self.gridLayout_4.addWidget(self.in_tool_speed, 3, 0, 1, 1)
+
+        self.chk_autoresize = QCheckBox(self.fr_right_col_container)
+        self.chk_autoresize.setObjectName(u"chk_autoresize")
+        self.chk_autoresize.setMinimumSize(QSize(0, 21))
+        self.chk_autoresize.setMaximumSize(QSize(16777215, 21))
+        self.chk_autoresize.setFont(font2)
+        self.chk_autoresize.setIconSize(QSize(16, 16))
+        self.chk_autoresize.setChecked(True)
+
+        self.gridLayout_4.addWidget(self.chk_autoresize, 3, 1, 1, 1)
 
 
-        self.verticalLayout_5.addLayout(self.verticalLayout_4)
+        self.verticalLayout_5.addLayout(self.gridLayout_4)
 
         self.gridLayout_5 = QGridLayout()
         self.gridLayout_5.setObjectName(u"gridLayout_5")
@@ -358,10 +366,10 @@ class Ui_MainWindow(object):
         self.lbl_mmx.setObjectName(u"lbl_mmx")
         self.lbl_mmx.setMinimumSize(QSize(15, 0))
         self.lbl_mmx.setMaximumSize(QSize(15, 16777215))
-        font2 = QFont()
-        font2.setFamilies([u"Courier New"])
-        font2.setPointSize(11)
-        self.lbl_mmx.setFont(font2)
+        font3 = QFont()
+        font3.setFamilies([u"Courier New"])
+        font3.setPointSize(11)
+        self.lbl_mmx.setFont(font3)
         self.lbl_mmx.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.horizontalLayout_3.addWidget(self.lbl_mmx)
@@ -379,7 +387,7 @@ class Ui_MainWindow(object):
         self.lbl_mmy.setObjectName(u"lbl_mmy")
         self.lbl_mmy.setMinimumSize(QSize(15, 0))
         self.lbl_mmy.setMaximumSize(QSize(15, 16777215))
-        self.lbl_mmy.setFont(font2)
+        self.lbl_mmy.setFont(font3)
         self.lbl_mmy.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.horizontalLayout_3.addWidget(self.lbl_mmy)
@@ -428,12 +436,13 @@ class Ui_MainWindow(object):
         self.btn_draw.setText(QCoreApplication.translate("MainWindow", u"Elabora", None))
         self.btn_reset.setText(QCoreApplication.translate("MainWindow", u"Reset", None))
         self.lbl_size.setText(QCoreApplication.translate("MainWindow", u"Dimensioni lastra", None))
-        self.lbl_width.setText(QCoreApplication.translate("MainWindow", u"L (mm)", None))
         self.lbl_height.setText(QCoreApplication.translate("MainWindow", u"A (mm)", None))
         self.in_width.setText(QCoreApplication.translate("MainWindow", u"0", None))
+        self.lbl_width.setText(QCoreApplication.translate("MainWindow", u"L (mm)", None))
         self.in_height.setText(QCoreApplication.translate("MainWindow", u"0", None))
-        self.lbl_tool_speed.setText(QCoreApplication.translate("MainWindow", u"Velocit\u00e0 mm/min", None))
+        self.lbl_tool_speed.setText(QCoreApplication.translate("MainWindow", u"mm/min", None))
         self.in_tool_speed.setText(QCoreApplication.translate("MainWindow", u"1000", None))
+        self.chk_autoresize.setText(QCoreApplication.translate("MainWindow", u"Resize", None))
         self.lbl_x_min_value.setText("")
         self.lbl_y_min.setText(QCoreApplication.translate("MainWindow", u"Y min", None))
         self.lbl_y_min_value.setText("")
