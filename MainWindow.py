@@ -93,6 +93,10 @@ class MainWindow(QMainWindow):
             'background-color: #DDDDDD; border: 1px solid #BBBBBB')
         self.ui.lbl_offset_value.setStyleSheet(
             'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+        self.ui.lbl_eng_dst_value.setStyleSheet(
+            'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+        self.ui.lbl_pos_dst_value.setStyleSheet(
+            'background-color: #DDDDDD; border: 1px solid #BBBBBB')
         # In questo modo risulta centrato nello spazio a sua disposizione
         self.ui.chk_autoresize.setStyleSheet("padding-left:20px")
 
@@ -710,6 +714,9 @@ class MainWindow(QMainWindow):
             self.iso_drawn = True
             # Calcolo la stima del tempo di lavorazione
             self.workingTime(engraving_dst, positioning_dst)
+
+            self.ui.lbl_eng_dst_value.setText('{:.3f}'.format(engraving_dst))
+            self.ui.lbl_pos_dst_value.setText('{:.3f}'.format(positioning_dst))
 
             # Se il flag è impostato su True, vuol dire che è stato rigenerato il disegno
             # a seguito del ridimensionamento della finestra
