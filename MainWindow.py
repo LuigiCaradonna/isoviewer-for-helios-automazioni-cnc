@@ -715,6 +715,8 @@ class MainWindow(QMainWindow):
             # Calcolo la stima del tempo di lavorazione
             self.workingTime(engraving_dst, positioning_dst)
 
+            # Inserisci i valori delle distanze di lavorazione e riposizionamento
+            # nelle rispettive label
             self.ui.lbl_eng_dst_value.setText('{:.3f}'.format(engraving_dst))
             self.ui.lbl_pos_dst_value.setText('{:.3f}'.format(positioning_dst))
 

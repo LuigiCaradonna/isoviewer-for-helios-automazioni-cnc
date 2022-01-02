@@ -356,6 +356,9 @@
                <pointsize>12</pointsize>
               </font>
              </property>
+             <property name="toolTip">
+              <string>Distanza incisioni</string>
+             </property>
              <property name="text">
               <string>Inc. dst</string>
              </property>
@@ -587,6 +590,9 @@
                <pointsize>12</pointsize>
               </font>
              </property>
+             <property name="toolTip">
+              <string>Profondità massima di lavorazione</string>
+             </property>
              <property name="text">
               <string>Z max</string>
              </property>
@@ -810,6 +816,9 @@
                <family>Courier New</family>
                <pointsize>12</pointsize>
               </font>
+             </property>
+             <property name="toolTip">
+              <string>Distanza posizionamenti</string>
              </property>
              <property name="text">
               <string>Pos. dst</string>
