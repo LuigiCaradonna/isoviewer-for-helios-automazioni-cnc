@@ -100,6 +100,10 @@ class MainWindow(QMainWindow):
         # In questo modo risulta centrato nello spazio a sua disposizione
         self.ui.chk_autoresize.setStyleSheet("padding-left:20px")
 
+        self.setTabOrder(self.ui.in_width, self.ui.in_height)
+        self.setTabOrder(self.ui.in_height, self.ui.in_tool_speed)
+        self.setTabOrder(self.ui.in_tool_speed, self.ui.chk_autoresize)
+
         # Timer per gestire il ritardo nella rigenerazione del tracciato
         # a seguito del ridimensionamento della scena
         self._resize_timer = QtCore.QTimer(self)
