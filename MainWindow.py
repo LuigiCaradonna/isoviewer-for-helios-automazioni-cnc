@@ -1,5 +1,5 @@
 from PySide6 import (QtCore, QtGui)
-from PySide6.QtWidgets import QMainWindow, QFileDialog, QGraphicsScene
+from PySide6.QtWidgets import QMainWindow, QFileDialog, QGraphicsScene, QLabel
 from UiMainwindow import Ui_MainWindow
 import os.path
 import math
@@ -26,31 +26,31 @@ class MainWindow(QMainWindow):
     scene_w = 0
     scene_h = 0
 
-    # Usando l'antialiasing per il canvas (attivo per default)
+    # Setting the antialiasing for the canvas (active by default)
     # self.ui.canvas.DontAdjustForAntialiasing(False)
-    # l'area del canvas viene estesa di 4 pixel oltre l'area visibile, facendo sballare
-    # di 4px la posizione del mouse, questo servirà a compensazione. Va messo a 0 se
-    # l'antialiasing non si usa
+    # the canvas area is extended by 4 pixels over the visible area, and the mouse position
+    # is offset by 4px, this will compensate this difference. Must be set to 0
+    # if the antialiasing is not in use
     canvas_expanded = 4
 
-    # Posizioni minime e massime della lavorazione
+    # Min and Max positions
     x_min = 10000
     y_min = 10000
     x_max = 0
     y_max = 0
     z_max = 0
 
-    # Da aggiornare ad ogni tracciamento di una linea, servirà per calcolare di quanto
-    # si alza l'utensile quando si deve staccare dal piano di incisione
+    # Last Z position, to be updated for each segment, this will be used to know
+    # how much the tool must be raised to leave the working surface
     last_z = 0
 
-    # Saranno valorizzati per portare tutte le coordinate in area positiva se necessario
+    # If needed, these will be set to make all the coordinates positive
     offset_x = 0
     offset_y = 0
 
-    # Indica se è stata disegnata una primitiva sulla scena
+    # Says whether anything was drawn or not
     iso_drawn = False
-    # Indica se il timer per ritardare la rigenerazione del disegno è attivo
+    # Says whether the timer to delay the drawing regeneration is active or not
     resize_timer_running = False
 
     def __init__(self):
@@ -64,13 +64,11 @@ class MainWindow(QMainWindow):
         self.ui.btn_reset.clicked.connect(self.resetScene)
         self.ui.btn_browse_file.clicked.connect(self.browseFile)
         self.scene = MyGraphicsScene()
-        # Intercetta il segnale emesso dalla sottoclasse e collegalo alla funzione mousePosition()
+        # Intercepts the signal emitted and connects it to the mousePosition() method
         self.scene.signalMousePos.connect(self.mousePosition)
-        # Per abilitare il tracciamento del mouse senza bisogno di cliccare
+        # Enable the mouse tracking without the need to click
         self.ui.canvas.setMouseTracking(True)
-        # L'antialiasing può servire solo se si muovono oggetti sulla scena, non è questo lo scopo del tool
-        # inoltre se l'antialiasing è attivo, l'area del canvas si espande di 4px
-        # self.ui.canvas.DontAdjustForAntialiasing(True)
+        
         self.ui.canvas.setScene(self.scene)
         self.ui.canvas.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
         self.ui.lbl_x_min_value.setStyleSheet(
@@ -97,68 +95,67 @@ class MainWindow(QMainWindow):
             'background-color: #DDDDDD; border: 1px solid #BBBBBB')
         self.ui.lbl_pos_dst_value.setStyleSheet(
             'background-color: #DDDDDD; border: 1px solid #BBBBBB')
-        # In questo modo risulta centrato nello spazio a sua disposizione
+        # To center the checkbox
         self.ui.chk_autoresize.setStyleSheet("padding-left:20px")
 
         self.setTabOrder(self.ui.in_width, self.ui.in_height)
         self.setTabOrder(self.ui.in_height, self.ui.in_tool_speed)
         self.setTabOrder(self.ui.in_tool_speed, self.ui.chk_autoresize)
 
-        # Timer per gestire il ritardo nella rigenerazione del tracciato
-        # a seguito del ridimensionamento della scena
+        # Timer to manage the delay when regenerating the drawing when the scene is resized
         self._resize_timer = QtCore.QTimer(self)
-        # Imposta il timer per un solo conteggio.
-        # Non uso direttamente un timer singeShot perché non permette l'uso dello stop
-        # necessario a simulare il reset implementato nel metodo resizeEvent()
+        # Set the timer as single shot.
+        # I'm not using a a singleshot timer because it doesn't have the stop() method which
+        # is required to simulate a reset as implemented in the resizeEvent() method
         self._resize_timer.setSingleShot(True)
         self._resize_timer.timeout.connect(self.draw)
-        # Indica se il timer va usato oppure no
+        # Says whether the timer must be used or not
         self.delayEnabled = True
-        # Ritardo in millisecondi
+        # Delay in milliseconds
         self.delayTimeout = 100
 
     def resizeEvent(self, event):
         '''
-        Override del metodo della classe QMainWindow
+        Overrides the QMainWindow resizeEvent()
         '''
-        # Quando si ridimensiona la finestra, vanno reimpostate le misure della scena
+        # When the main window is resized, the scen size must be adjusted
         self.scene_w, self.scene_h = self.getCanvasSize()
 
-        # Se c'è qualcosa sulla scena ed è abilitato l'auto-resize
+        # If there is something on the scene and the auto-resize is enabled
         if self.iso_drawn and self.ui.chk_autoresize.isChecked():
-            # Se è abilitato il timer per la rigenerazione del tracciato
+            # If the timer is enabled
             if self.delayEnabled:
-                # Se il timer è stato avviato
+                # If the timer has been started
                 if self.resize_timer_running:
-                    # Ferma il timer perché ancora si sta ridimensionando la finestra
+                    # Stop the timer, because the user is still resizing the window
                     self._resize_timer.stop()
-                    # Indica che il timer non è più attivo
+                    # Says that the timer is no more active
                     self.resize_timer_running = False
 
-                # Avvia il timer
+                # Start the timer
                 self._resize_timer.start(self.delayTimeout)
-                # Indica che il timer è attivo
+                # Says that the timer is active
                 self.resize_timer_running = True
+            # If the timer is not enabled
             else:
-                # Avvia direttamente la rigenerazione del disegno
+                # Regenerate the drawing
                 self.draw()
 
     def showEvent(self, event):
         '''
         Override del metodo chiamato quando la MainWindow è pronta e visualizzata
         '''
-        # Inizializzo le dimensioni della scena per avere una posizione valida del mouse anche prima
-        # di caricare una primitiva
+        # Initialize the scene's size to also have a valid position for the mouse pointer
         self.scene_w, self.scene_h = self.getCanvasSize()
 
         # print(str(self.scene_w) + ' X ' + str(self.scene_h))
 
     def getCanvasSize(self):
-        '''Restituisce le dimensioni visibili del canvas'''
+        '''Returns the visible size of the canvas'''
         return (self.ui.canvas.width() - self.canvas_expanded, self.ui.canvas.height() - self.canvas_expanded)
 
     def resetCoordinatesLimits(self):
-        '''Resetta le posizioni minime e massime della lavorazione'''
+        '''Resets the min and max values'''
         self.x_min = 10000
         self.y_min = 10000
         self.z_max = 0
@@ -168,13 +165,13 @@ class MainWindow(QMainWindow):
         self.offset_y = 0
 
     def browseFile(self):
-        '''Apre la finestra di dialogo per la scelta del file iso'''
-        # Filtro per mostrare nella finestra solo file con estensione PGR
+        '''Opens the file browser'''
+        # Filter to show only PGR files
         filter = "pgr(*.PGR)"
-        # Permetto la selezione di più file
+        # Allows multiple files selection
         self.iso_file, _ = QFileDialog.getOpenFileNames(self, 'OpenFile', filter=filter)
         
-        # Stringa da stampare sulla label dei file selezionati
+        # Stirng to print on the selected files label
         file_output = ''
         for file in self.iso_file:
             filename = os.path.basename(file)
@@ -184,8 +181,8 @@ class MainWindow(QMainWindow):
 
     def resetErrors(self):
         '''
-        Resetta i campi di input, la label contenente il file iso scelto e la status bar
-        per eliminare eventuali indicazioni di errore
+        Resets the input fields, the selected files label and the status bar to
+        remove eventual error messages and relative highlighting
         '''
         self.ui.in_width.setStyleSheet("border: 1px solid black")
         self.ui.in_height.setStyleSheet("border: 1px solid black")
@@ -194,18 +191,19 @@ class MainWindow(QMainWindow):
         self.ui.statusbar.showMessage('')
 
     def checkData(self):
-        '''Valida i dati immessi prima di elaborare il file iso'''
+        '''Validates the data'''
 
+        # For each selected file
         for file in self.iso_file:
-            # Verifica se il file indicato esiste e se è un file PGR
+            # Verify that the file exists and has the proper extension
             if not os.path.isfile(file) or not file[-3:] == 'PGR':
                 self.ui.lbl_selected_file.setStyleSheet("border: 1px solid red")
                 self.ui.statusbar.showMessage('Selezionare solo file ISO validi')
                 return False
-            # Se il file indicato esiste ed ha estensione PGR
+            # If the file exists and it has the PGR extension
             else:
                 with open(file) as f:
-                    # Se non inizia con "QUOTE RELATIVE"
+                    # If the file does not begin with the string "QUOTE RELATIVE"
                     if f.readline().rstrip() != 'QUOTE RELATIVE':
                         self.ui.lbl_selected_file.setStyleSheet(
                             "border: 1px solid red")
@@ -213,58 +211,63 @@ class MainWindow(QMainWindow):
                             'Selezionare solo file ISO validi')
                         return False
 
-        # Se il campo width è vuoto, impostalo a 0
+        # If the width field is empty
         if self.ui.in_width.text() == '':
+            # Set to 0
             self.ui.in_width.setText('0')
-        # Controlla se è stato inserito un valore non valido nel campo larghezza
+        # Check if the width value is valid
         if not self.ui.in_width.text().isnumeric() or int(self.ui.in_width.text()) < 0:
             self.ui.in_width.setStyleSheet("border: 1px solid red")
             self.ui.statusbar.showMessage(
                 'Indicare una larghezza valida (numero intero positivo o 0)')
             return False
-        # E' stato indicato un numero valido
+        # The value is valid
         else:
-            # Ma potrebbe essere un decimale, lo rimpiazzo con la sola parte intera
+            # But it could be a decimal number, get only the integer part
             self.ui.in_width.setText(str(int(self.ui.in_width.text())))
 
-        # Se il campo height è vuoto, impostalo a 0
+        # If the height field is empty
         if self.ui.in_height.text() == '':
+            # Set to 0
             self.ui.in_height.setText('0')
-        # Verifica se è stato inserito un numero valido nel campo altezza
+        # Check if the height value is valid
         if not self.ui.in_height.text().isnumeric() or int(self.ui.in_height.text()) < 0:
             self.ui.in_height.setStyleSheet("border: 1px solid red")
             self.ui.statusbar.showMessage(
                 'Indicare un\'altezza valida (numero intero positivo o 0)')
             return False
-        # E' stato indicato un numero valido
+        # The value is valid
         else:
-            # Ma potrebbe essere un decimale, lo rimpiazzo con la sola parte intera
+            # But it could be a decimal number, get only the integer part
             self.ui.in_height.setText(str(int(self.ui.in_height.text())))
 
-        # Se il campo tool speed è vuoto, impostalo a 0
+        # If the speed tool value field is empty
         if self.ui.in_tool_speed.text() == '':
-            self.ui.in_tool_speed.setText('0')
-        # Verifica se è stato inserito un numero valido nel campo tool speed
-        if not self.ui.in_tool_speed.text().isnumeric() or int(self.ui.in_tool_speed.text()) < 0:
+            # Set to 1000
+            self.ui.in_tool_speed.setText('1000')
+        # Check if the speed tool value is valid
+        if not self.ui.in_tool_speed.text().isnumeric() or int(self.ui.in_tool_speed.text()) <= 0:
             self.ui.in_tool_speed.setStyleSheet("border: 1px solid red")
             self.ui.statusbar.showMessage(
                 'Indicare una velocità valida (numero intero positivo)')
             return False
-        # E' stato indicato un numero valido
+        # The value is valid
         else:
-            # Ma potrebbe essere un decimale, lo rimpiazzo con la sola parte intera
+            # But it could be a decimal number, get only the integer part
             self.ui.in_tool_speed.setText(
                 str(int(self.ui.in_tool_speed.text())))
 
-        # Controllo se è stata indicata solo la larghezza e non l'altezza
+        # Check if only the width has been set
         if int(self.ui.in_width.text()) > 0 and self.ui.in_height.text() == '0':
+            # Both the sizes must be set or none of them
             self.ui.in_height.setStyleSheet("border: 1px solid red")
             self.ui.statusbar.showMessage(
                 'Indicare entrambe le dimensioni o nessuna')
             return False
 
-        # Controllo se è stata indicata solo l'altezza e non la larghezza
+        # Check if only the height has been set
         if int(self.ui.in_height.text()) > 0 and self.ui.in_width.text() == '0':
+            # Both the sizes must be set or none of them
             self.ui.in_width.setStyleSheet("border: 1px solid red")
             self.ui.statusbar.showMessage(
                 'Indicare entrambe le dimensioni o nessuna')
@@ -274,29 +277,29 @@ class MainWindow(QMainWindow):
 
     def scaleFactor(self, w, h):
         '''
-        Calcola il fattore di scala per ridimensionare il disegno della lavorazione
-        in modo che si adatti alle dimensioni della scena
+        Calculates the scale factor to resize the drawing to fit the scene size
         '''
-        # N.B. non uso self.scene_w e self.scene_h impostate in showEvent() al posto di
-        # per le dimensioni della scena, perché dopo l'apparizione della finestra, questa può essere
-        # ridimensionata e quindi le dimensioni del canvas potrebbero essere diverse
+        # I do not use self.scene_w and self.scene_h set into showEvent()
+        # for the size of the scene, because after that the window is shown it could have been
+        # resized and the canvas size could be changed
 
-        # Dimensioni del canvas
+        # Canvas size
         canvas_w, canvas_h = self.getCanvasSize()
 
-        # Calcola il fattore di scala che porta la larghezza della scena ad eguagliare quella del canvas
+        # Calculates the scale factor to fit the width
         scale_x = canvas_w / w
-        # Calcola il fattore di scala che porta l'altezza della scena ad eguagliare quella del canvas
+        # Calculates the scale factor to fit the hight
         scale_y = canvas_h / h
 
+        # Return the smallest scale factor
         return scale_x if scale_x <= scale_y else scale_y
 
     def resetScene(self, reset_to_draw=False):
         '''
-        Reimposta la scena allo stato iniziale
-        Param - boolean draw: se false resetta anche il file selezionato
+        Reset the scene to the initial state
+        Param - boolean draw: if False also reset the selected files
         '''
-        # Resetta la scena
+        # Reset the scene
         self.scene.clear()
         self.scale_factor = 1
         self.ui.lbl_x_min_value.setText('')
@@ -310,190 +313,191 @@ class MainWindow(QMainWindow):
         if not reset_to_draw:
             self.iso_file = ''
             self.ui.lbl_selected_file.setText('')
-        # Indica che la scena è vuota
+        # Says that no drowing is on the scene
         self.iso_drawn = False
 
     def setScene(self):
-        '''Prepara la scena per contenere il disegno della lavorazione appena elaborata'''
+        '''
+        Set the scen to contain the drawing just elaborated
+        '''
 
-        # Resetta la scena
+        # Reset the scene
         self.resetScene(True)
 
-        # Dimensioni indicate per la lastra
+        # Size set for the slab
         width = float(self.ui.in_width.text())
         height = float(self.ui.in_height.text())
 
-        # Dimensioni del canvas
+        # Canvas size
         canvas_w, canvas_h = self.getCanvasSize()
 
-        # Se è stata indicata una larghezza è stata anche indicata un'altezza, se ne accerta checkData()
+        # If a width has been set, also the hight is set, the validate() method takes care of that
         if width > 0:
-            # Calcola il fattore di scala per adeguarsi alla dimensione del canvas
+            # Calculate the scale factor to fit the scene
             self.scale_factor = self.scaleFactor(width, height)
 
-            # Assegna la dimensione della lastra scalata in base alla dimensione del canvas
+            # Assign the slab size resized according to the scale factor
             self.scene_w = width * self.scale_factor
             self.scene_h = height * self.scale_factor
-
+        # The slab size has not been set
         else:
-            # Le dimensioni della lastra non sono state indicate, quindi come dimensione
-            # per calcolare il fattore di scala ed adeguarsi alla dimensione del canvas
-            # si prende l'ingombro della lavorazione
+            # To calculate the scale factor, consider the drwaing size
             self.scale_factor = self.scaleFactor(self.x_max, self.y_max)
 
-            # Assegna le dimensioni del canvas
+            # Assign the canvas size
             self.scene_w = canvas_w
             self.scene_h = canvas_h
 
-        # Imposta la scena grande quanto il canvas
+        # Set the scene as big as the canvas
         self.scene.setSceneRect(0, 0, canvas_w, canvas_h)
 
-        # print(str(self.scale_factor))
-
-        # Se è stata indicata una dimensione per la lastra
+        # If the size for the slab has been set
         if width > 0:
-            # Traccia il rettangolo che la definisce. Nel caso in cui la dimensione non è indicata
-            # il rettangolo sarebbe sempre pari alla dimensione del canvas e non serve
+            # Draw a rectangle defining it
             self.scene.addRect(QtCore.QRectF(0, 0, self.scene_w, self.scene_h))
 
     def getCoordinates(self):
-        '''Legge il file iso ed estrapola coordinate e dati utili al tracciamento del disegno della lavorazione'''
+        '''
+        Read the ISO file and gets the coordinate useful for the drawing
+        '''
         
-        # Resetta i valori massimi e minimi delle coordinate
+        # Reset the min and max values
         self.resetCoordinatesLimits()
-        # Lista di coordinate ed indicazioni di movimento per disegnare il percorso dell'utensile
+        # List containing the useful coordinates
         coords = []
 
         for file in self.iso_file:
-            # Indica se ci si trova sul primo punto in cui l'utensile si abbassa per la lavorazione
+            # Says if the tool is over the first point where it lowes to engrave
             first_down = False
-            # Il posizionamento per il punto su cui si inizia a lavorare è dopo il secondo G12 Z0
-            # in questa variabile porto il conto per riconoscerlo
+            # The position where the engraving starts is after the second G12 Z0
+            # thi variable is a counter to recognize it
             z_down = 0
 
-            # apri il file ISO
+            # Opens the ISO file
             original_file = open(file, 'r')
-            # copia il contenuto del file
+            # Copy the file content
             iso = original_file.readlines()
-            # chiudi il file
+            # Close the file
             original_file.close()
 
-            # Cicla su tutte le righe del file
+            # Loop over all the rows of the file
             for line_of_code in iso:
-                # Righe che iniziano con "G02 X" indicano posizioni che producono incisioni - Es.: G02 X508 Y556 Z-13
+                # Rows starting with G02 X indicate positions which produce engravings - i.e.: G02 X508 Y556 Z-13
                 if line_of_code.find('G02 X') == 0:
-                    # Dividi la riga di codice
+                    # Split the code
                     subline = line_of_code.split(' ')
 
-                    # Il secondo elemento è la coordinata X, parto da 1 per eliminare il carattere X iniziale
+                    # The second element is the X coordinate, remove the first character (X)
+                    # limit the number to 3 decimals
                     x = float('{:.3f}'.format(float(subline[1][1:])))
 
-                    # Aggiorna la x minima se necessario
+                    # Update the x min
                     if x <= self.x_min:
                         self.x_min = x
-                    # Aggiorna la x massima se necessario
+                    # Update the x max
                     if x >= self.x_max:
                         self.x_max = x
 
-                    # Il terzo elemento è la coordinata Y, parto da 1 per eliminare il carattere Y iniziale
+                    # The third element is the Y coordinate, remove the first character (Y)
+                    # limit the number to 3 decimals
                     y = float('{:.3f}'.format(float(subline[2][1:])))
 
-                    # Aggiorna la y minima se necessario
+                    # Update the y min
                     if y <= self.y_min:
                         self.y_min = y
-                    # Aggiorna la y massima se necessario
+                    # Update the y max
                     if y >= self.y_max:
                         self.y_max = y
 
-                    # Il quarto elemento è la coordinata Z, parto da 1 per eliminare il carattere Z iniziale
+                    # The fourth element is the Z coordinate, remove the first character (Z)
+                    # limit the number to 3 decimals
                     z = float('{:.3f}'.format(float(subline[3][1:])))
-                    # Aggiorna la z massima se necessario
+                    # Update the z max
                     if z < self.z_max:
                         self.z_max = z
 
-                    # Aggiungo alla lista delle coordinate utili
+                    # Add the coordinates to the list
                     coords.append((x, y, z))
 
-                # Righe che iniziano con "G12 X" indicano un riposizionamento sul piano XY
+                # Rows starting with G12 X indicate a repositioning over the XY plane
                 elif line_of_code.find('G12 X') == 0:
-                    # Quando si considerano gli spostamenti si devono calcolare X e Y min/max solo se
-                    # è la coordinata di inizio lavorazione (non da dove parte l'utensile, ma il primo punto
-                    # su cui si abbassa per iniziare la lavorazione)
-                    # altrimenti X e Y min sarebbero sempre 0 visto che ci si muove partendo dall'origine
-                    # mentre X e Y max negli spostamenti al più eguagliano i valori
-                    # che si hanno durante l'incisione
+                    # Considering the positioning, X an Y min/max must not be calculated from where the tool starts
+                    # or X and Y min would always be 0 since it is the origin of the job, they must be considered
+                    # from the next position, that is where the the tool lowers for the first time to engrave.
+                    # It is not sure that this will be the min or max, but it is a valid position to consider.
 
-                    # Dividi la riga di codice
+                    # Split the code
                     subline = line_of_code.split(' ')
 
-                    # Prendo la coordinata X, parto da 1 per eliminare il carattere X iniziale
+                    # The second element is the X coordinate, remove the first character (X)
+                    # limit the number to 3 decimals
                     x = float('{:.3f}'.format(float(subline[1][1:])))
 
-                    # Prendo la coordinata Y, parto da 1 per eliminare il carattere Y iniziale
+                    # The third element is the Y coordinate, remove the first character (Y)
+                    # limit the number to 3 decimals
                     y = float('{:.3f}'.format(float(subline[2][1:])))
 
-                    # Se ci si trova sul primo punto in cui l'utensile si abbassa per lavorare
+                    # If this is the first place where the tool lowers to engrave
                     if first_down:
-                        # Aggiorna la x minima se necessario
+                        # Update the x min
                         if x <= self.x_min:
                             self.x_min = x
-                        # Aggiorna la x massima se necessario
+                        # Update the x max
                         if x >= self.x_max:
                             self.x_max = x
 
-                        # Aggiorna la y minima se necessario
+                        # Update the y min
                         if y <= self.y_min:
                             self.y_min = y
-                        # Aggiorna la y massima se necessario
+                        # Update the y max
                         if y >= self.y_max:
                             self.y_max = y
 
-                        # Resetto la variabile, da ora in poi non si userà più
+                        # Reset the flag, from now on it will not be used anymore
                         first_down = False
 
-                    # Aggiungo alla lista delle coordinate utili, nella lista sarà sempre preceduta da un "up"
+                    # Add the coordinates to the list, this will always be preceded by an "up"
                     coords.append((x, y, 0))
 
-                # Le righe "G02 Z" indicano il movimento solo verticale dell'utensile per iniziare un'incisione
+                # Rows starting with G02 Z indicate the only vertical movement to start to engrave
                 elif line_of_code.find('G02 Z') == 0:
-                    # Dividi la riga di codice
+                    # Split the code
                     subline = line_of_code.split(' ')
 
-                    # Indico che la prossima coordinata sarà la discesa dell'utensile
+                    # Says that the next coordinate will be the tool lowering
                     coords.append(('down', 0, 0))
 
-                    # Riporto di quanto si abbassa l'utensile
+                    # Says how much the tool lowers
                     coords.append(
                         (0, 0, float('{:.3f}'.format(float(subline[1][1:])))))
 
-                # Le righe "G12 Z0" indicano il movimento solo verticale dell'utensile per terminare un'incisione
+                # Rows starting with G12 Z0 indicate the only vertical movement to raise the tool from the working plane
                 elif line_of_code.find('G12 Z0') == 0:
-                    # Se non sono ancora al secondo G12 Z0
+                    # If the second G12 Z0 has not yet been found
                     if z_down < 2:
-                        # Incrementa il contatore
+                        # Increment the counter
                         z_down += 1
-                    # Se ho appena trovato il secondo G12 Z0
+                    # If the second G12 Z0 has just been found
                     if z_down == 2:
-                        # Imposta il flag a True per indicare che qui si abbasserà l'utensile per la prima volta
+                        # Set the flag to True to say that here the tool will lower for the first time
                         first_down = True
 
-                    # Riporto l'informazione nella lista delle incisioni, esempio:
+                    # Example
                     # G02 X100 Y0 Z-10
                     # G02 X0 Y0 Z-10
                     # G12 Z0
                     # G12 X150 Y100
                     # G02 Z-10
                     # G02 X150 Y200 Z-10
-                    # In questo caso, nella lista delle coordinate per le incisioni ci sarebbero
+                    # In this case, the coordinates list would contain
                     # ((100, 0), (0, 0), (150, 100))
-                    # ma la linea da (0, 0) a (150, 100) non è da disegnare, quindi "up" indicherà questa situazione.
-                    # Inoltre quando si incontra un "up" si dovrà leggere l'ultima quota Z per sapere di quanto si alza l'utensile
-                    # nello specifico sarà il valore assoluto dell'ultima quota Z
+                    # but the segment from (0, 0) to (150, 100) must not be drawn, thus "up" will indicate this situation.
+                    # When an "up" is found, the last Z coordinate must be read to know how much the tool will be raised
+                    # the absolute value of the Z must be considered, since the Z is always negative or 0
                     coords.append(('up', 0, 0))
 
-        # Controlla se la x e/o la y in qualche punto diventano negative e riporta tutto in area positiva
-        # altrimenti non sarà possibile la visualizzazione visto che il canvas accetta solo
-        # coordinate positive
+        # Check whether the X and/or Y Csomewhere become negative and take everything back to positive values
+        # or it will not be possible to draw on the scene, which only accepts positive coordinates
         if self.x_min < 0:
             self.offset_x = abs(self.x_min)
             self.x_min = 0
@@ -504,23 +508,26 @@ class MainWindow(QMainWindow):
             self.y_min = 0
             self.y_max += self.offset_y
 
-        # Se almeno uno degli offset è stato impostato
+        # If at least one of the offset has been set
         if self.offset_x > 0 or self.offset_y > 0:
             num_coords = len(coords)
 
-            # Per ogni entry della lista delle coordinate
+            # For each coordinate in the list
             for i in range(num_coords-1):
-                # Se la tupla corrente non contiene indicazioni di movimento
+                # If the current tuple does not contain a movement indication
                 if coords[i][0] != 'up' and coords[i][0] != 'down':
-                    # Addiziona gli offset per portare il disegno in area positiva, la z resta invariata
+                    # Add the offsets to move the drawing into the positive area
                     new_x = float(coords[i][0]) + self.offset_x
                     new_y = float(coords[i][1]) + self.offset_y
                     coords[i] = (new_x, new_y, coords[i][2])
 
+        # Return the list
         return coords
 
     def workingTime(self, eng_dst, pos_dst):
-        '''Calcola una stima del tempo di lavorazione'''
+        '''
+        Estimates the working time
+        '''
         tot_dst = eng_dst + pos_dst
 
         seconds = (tot_dst / float(self.ui.in_tool_speed.text())) * 60
@@ -529,7 +536,9 @@ class MainWindow(QMainWindow):
             time.strftime('%H:%M:%S', time.gmtime(seconds)))
 
     def mousePosition(self, pos):
-        '''Mostra sull'interfaccia le coordinate del puntatore del mouse adeguate al fattore di scala in uso'''
+        '''
+        Gets and shows the mouse pointer coordinates
+        '''
         self.ui.lbl_mouse_pos_x.setText(
             str('{:.1f}'.format(float(pos.x() * (1/self.scale_factor)))))
         self.ui.lbl_mouse_pos_y.setText(
@@ -538,7 +547,9 @@ class MainWindow(QMainWindow):
         # print('x: ' + str(int(pos.x())) + ' | y: ' + str(int(pos.y())))
 
     def draw(self):
-        '''Traccia il disegno della lavorazione'''
+        '''
+        Displays the drawing
+        '''
 
         self.resetErrors()
 
@@ -547,15 +558,14 @@ class MainWindow(QMainWindow):
             num_coords = len(coords)
             self.setScene()
 
-            # Limita il valore a 3 decimali e stampa il valore sulla label corrispondente
+            # Limit the valueas to the 3 decimals and print them on the proper label
             self.ui.lbl_x_min_value.setText('{:.3f}'.format(self.x_min))
             self.ui.lbl_x_max_value.setText('{:.3f}'.format(self.x_max))
             self.ui.lbl_y_min_value.setText('{:.3f}'.format(self.y_min))
             self.ui.lbl_y_max_value.setText('{:.3f}'.format(self.y_max))
             self.ui.lbl_z_max_value.setText('{:.3f}'.format(self.z_max))
 
-            # Stampa sulla label offset se il disegno è stato spostato,
-            # in tal caso vorrebbe dire che ci sono coordinate negative sulla primitiva
+            # Print over the offset label if the drawing has been moved
             if self.offset_x > 0 and self.offset_y > 0:
                 self.ui.lbl_offset_value.setText('X - Y')
             elif self.offset_x > 0 and self.offset_y == 0:
@@ -565,123 +575,126 @@ class MainWindow(QMainWindow):
             else:
                 self.ui.lbl_offset_value.setText('No')
 
-            # Ingombro della lavorazione
+            # Drawing size
             drawing_w = self.x_max - self.x_min
             drawing_h = self.y_max - self.y_min
 
+            # Print the drawing size on its label
             self.ui.lbl_rectangle_value.setText(
                 '{:.3f}'.format(drawing_w) + ' X ' + '{:.3f}'.format(drawing_h))
 
+            # These keep track of the distance covered by the tool
             engraving_dst = 0
             positioning_dst = 0
-            # Indica la posizione corrente dell'utensile, inizializzata sull'origine
+
+            # Current position of the tool, initialized over the origin
             current_position = (0, 0, 0)
+            # Number of segments drawn
             lines = 0
 
-            # Indica se si sta correntemente abbassando l'utensile
+            # Says if the tool is currently lowering
             lowering = False
-            # Indica se si sta eseguendo un'incisione
+            # Says if the tool is engraving
             drawing = False
-            # Indica se ci si deve riposizionare
+            # Says if a positioning is required
             repositioning = False
 
             for i in range(num_coords):
-                # Se non sono alla fine della primitiva ed è indicato di alzare l'utensile
-                # vuol dire che sta per aver luogo un riposizionamento
+                # If this is not the end of the file and the tool must be raised
+                # that means that the next movement will be to position the tool
                 if i < num_coords and coords[i][0] == 'up':
-                    # Addiziona il cambio di quota alla distanza degli spostamenti
+                    # Add the vertical movement lenght to the positioning distance
                     positioning_dst += abs(self.last_z)
 
-                    # Imposta i flag
+                    # Set the flags
                     lowering = False
                     drawing = False
                     repositioning = True
 
-                    # Termina l'iterazione
+                    # Terminate the iteration
                     continue
 
-                # Se sono alla fine della primitiva e si deve alzare l'utensile,
-                # l'unica distanza da considerare è lo spostamento verticale perché poi finirà la lavorazione
+                # If this is the end of the file and the tool must be raised,
+                # the only distance to considerate is the vertical movement, then everything is over
                 elif coords[i][0] == 'up':
-                    # Addiziona il cambio di quota alla distanza degli spostamenti
+                    # Add the the absolute last z value to the positioning distance
                     positioning_dst += abs(self.last_z)
 
-                    # Aggiorna la posizione corrente
+                    # Update the current position
                     current_position = (
                         current_position[0], current_position[1], 0)
 
-                    # Imposta i flag
+                    # Set the flags
                     lowering = False
                     drawing = False
                     repositioning = False
 
-                    # Termina l'iterazione
+                    # Terminate the iteration
                     continue
 
-                # Se è indicato di abbassare l'utensile (non controllo di essere alla fine della primitiva
-                # perché se si abbassa l'utensile, di sicuro c'è ancora qualcosa da fare)
+                # If the tool must be lowered (no need to check if we are at the end of the file
+                # because if the tool lowerd, for sure there is something else to do)
                 if coords[i][0] == 'down':
-                    # Non aggiorno qui la quota Z perché dovrei leggere la tupla seguente per saperlo
-                    # Rimando quindi l'operazione alla prossima iterazione, che leggendo lowering=True
-                    # saprà che si dovrà eseguire il calcolo
+                    # I do not update the Z distance now, because I should read the next tuple to know it.
+                    # I postpone that to the next iteration, which reading lowering=True
+                    # will know that it has to calculate the distance.
 
-                    # Imposta i flag
+                    # Set the flags
                     lowering = True
                     drawing = False
                     repositioning = False
 
-                    # Termina l'iterazione
+                    # Terminate the iteration
                     continue
 
-                # Da qui, sicuramente ci sono solo tuple con coordinate e non indicazioni di movimenti
+                # From here on, there will only be tuples with coordinates and not movement indication
 
-                # Se si sta riposizionando l'utensile sul piano XY
+                # If the tool is repositioning on the XY plane
                 if repositioning:
                     dx = pow(coords[i][0] - current_position[0], 2)
                     dy = pow(coords[i][1] - current_position[1], 2)
                     positioning_dst += math.sqrt(dx + dy)
 
-                    # Aggiorno la posizione corrente, la Z non cambia sui riposizionamenti XY
+                    # Update the current position, Z position does not change over repositionings
                     current_position = (
                         coords[i][0], coords[i][1], current_position[2])
 
-                    # Imposto i flag
+                    # Set the flags
                     lowering = False
                     drawing = False
                     repositioning = False
 
-                    # Termina l'iterazione
+                    # Terminate the iteration
                     continue
 
-                # Se si sta abbassando l'utensile
+                # If the tool is lowering
                 if lowering:
-                    # Di sicuro qui ci sarà la tupla contenente solo il cambio di quota Z
+                    # Here there will certainly be a tuple containing only a Z coordinate changing
                     positioning_dst += abs(coords[i][2])
 
-                    # Aggiorna la coortinata corrente
+                    # Update the current position
                     current_position = (
                         current_position[0], current_position[1], coords[i][2])
 
-                    # Imposto i flag
+                    # Set the flags
                     lowering = False
                     drawing = True
                     repositioning = False
 
-                    # Termina l'iterazione
+                    # Terminate the iteration
                     continue
 
-                # Se si sta incidendo
+                # If the tool is engraving
                 if drawing:
-                    # Calcolo la distanza dell'incisione
+                    # Calculate the engraving distance
                     dx = pow(coords[i][0] - current_position[0], 2)
                     dy = pow(coords[i][1] - current_position[1], 2)
                     dz = pow(coords[i][2] - current_position[2], 2)
                     engraving_dst += math.sqrt(dx + dy + dz)
 
-                    # Disegno il segmento fino al punto indicato dalla coordinata
-                    # la X resta come indicata nel file PGR, la Y invece va ricalcolata perché
-                    # l'asse Y nel PGR è considerato dal basso verso l'alto, nel Canvas invece
-                    # è considerato dall'alto verso il basso
+                    # Draw the segment until the point indicated by the coordinate
+                    # X stays as read from the file, the Y must be calculated because the Y tha machine's axis
+                    # values increas from bottom to top, in the canvas instead goes from top to bottom
                     p1 = QtCore.QPoint(
                         current_position[0] * self.scale_factor,
                         self.scene_h -
@@ -693,39 +706,38 @@ class MainWindow(QMainWindow):
                         self.scene_h - (coords[i][1] * self.scale_factor)
                     )
 
-                    # Aggiungo il segmento alla scena
+                    # Add the segment to the scene
                     self.scene.addLine(QtCore.QLine(p1, p2))
 
-                    # Aggiorna la posizione corrente
+                    # Update the current position
                     current_position = (
                         coords[i][0], coords[i][1], coords[i][2])
 
-                    # Aggiorno il valore della Z da usare per calcolare la distanza del movimento quando si alza l'utensile
+                    # Update the last z value
                     self.last_z = coords[i][2]
 
-                    # Aggiorno il conto delle linee
+                    # Update the lines count
                     lines += 1
 
-                    # Imposto i flag
+                    # Set the flags
                     lowering = False
                     drawing = True
                     repositioning = False
 
-                    # Termina l'iterazione
+                    # Terminate the iteration
                     continue
 
-            # Indico che sulla scena è stato disegnato qualcosa
+            # Says that there is something on the scene
             self.iso_drawn = True
-            # Calcolo la stima del tempo di lavorazione
+            # Estimate the woking time
             self.workingTime(engraving_dst, positioning_dst)
 
-            # Inserisci i valori delle distanze di lavorazione e riposizionamento
-            # nelle rispettive label
+            # Print the engraving and repositioning distances to the relative labels
             self.ui.lbl_eng_dst_value.setText('{:.3f}'.format(engraving_dst))
             self.ui.lbl_pos_dst_value.setText('{:.3f}'.format(positioning_dst))
 
-            # Se il flag è impostato su True, vuol dire che è stato rigenerato il disegno
-            # a seguito del ridimensionamento della finestra
+            # If the flag is set to True, that means that the drawing has ben regenerated
+            # after that the scene was resized
             if self.resize_timer_running:
-                # Indica che il timer ha finito il conteggio
+                # Says that the timer timed out and it not running anymore
                 self.resize_timer_running = False
