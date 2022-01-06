@@ -20,7 +20,7 @@ class MyGraphicsScene(QGraphicsScene):
 
 class MainWindow(QMainWindow):
 
-    iso_file = ''
+    iso_files = ''
     scale_factor = 1
     # Dimensioni della scena
     scene_w = 0
@@ -113,7 +113,7 @@ class MainWindow(QMainWindow):
         # Says whether the timer must be used or not
         self.delayEnabled = True
         # Delay in milliseconds
-        self.delayTimeout = 100
+        self.delayTimeout = 500
 
     def resizeEvent(self, event):
         '''
@@ -121,6 +121,7 @@ class MainWindow(QMainWindow):
         '''
         # When the main window is resized, the scen size must be adjusted
         self.scene_w, self.scene_h = self.getCanvasSize()
+        # Delete the selected files label content
         self.ui.lbl_selected_file.setText('')
 
         # If there is something on the scene and the auto-resize is enabled
@@ -186,10 +187,10 @@ class MainWindow(QMainWindow):
         # Filter to show only PGR files
         filter = "pgr(*.PGR)"
         # Allows multiple files selection
-        self.iso_file, _ = QFileDialog.getOpenFileNames(
+        self.iso_files, _ = QFileDialog.getOpenFileNames(
             self, 'OpenFile', filter=filter)
 
-        for file in self.iso_file:
+        for file in self.iso_files:
             filename = os.path.basename(file)
             self.selected_files_full_string += '"' + filename + '" '
 
@@ -211,7 +212,7 @@ class MainWindow(QMainWindow):
         '''Validates the data'''
 
         # For each selected file
-        for file in self.iso_file:
+        for file in self.iso_files:
             # Verify that the file exists and has the proper extension
             if not os.path.isfile(file) or not file[-3:] == 'PGR':
                 self.ui.lbl_selected_file.setStyleSheet(
@@ -333,7 +334,7 @@ class MainWindow(QMainWindow):
         self.ui.lbl_offset_value.setText('')
         self.ui.lbl_working_time_value.setText('')
         if not reset_to_draw:
-            self.iso_file = ''
+            self.iso_files = ''
             self.selected_files_full_string = ''
             self.ui.lbl_selected_file.setText('')
         # Says that no drowing is on the scene
@@ -401,7 +402,7 @@ class MainWindow(QMainWindow):
 
         iso = []
 
-        for file in self.iso_file:
+        for file in self.iso_files:
             # Opens the ISO file
             original_file = open(file, 'r')
             # Copy the file content
