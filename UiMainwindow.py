@@ -47,6 +47,7 @@ class Ui_MainWindow(object):
         self.canvas.setObjectName(u"canvas")
         self.canvas.setMinimumSize(QSize(0, 0))
         self.canvas.viewport().setProperty("cursor", QCursor(Qt.ArrowCursor))
+        self.canvas.setMouseTracking(True)
         self.canvas.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.canvas.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
@@ -66,7 +67,14 @@ class Ui_MainWindow(object):
 
         self.lbl_selected_file = QLabel(self.centralwidget)
         self.lbl_selected_file.setObjectName(u"lbl_selected_file")
-        self.lbl_selected_file.setScaledContents(True)
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.lbl_selected_file.sizePolicy().hasHeightForWidth())
+        self.lbl_selected_file.setSizePolicy(sizePolicy)
+        self.lbl_selected_file.setText(u"")
+        self.lbl_selected_file.setTextFormat(Qt.PlainText)
+        self.lbl_selected_file.setScaledContents(False)
 
         self.horizontalLayout_2.addWidget(self.lbl_selected_file)
 
@@ -449,7 +457,6 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"ISO Viewer", None))
         self.btn_browse_file.setText(QCoreApplication.translate("MainWindow", u"Load ISO file", None))
-        self.lbl_selected_file.setText("")
         self.btn_draw.setText(QCoreApplication.translate("MainWindow", u"Elabora", None))
         self.btn_reset.setText(QCoreApplication.translate("MainWindow", u"Reset", None))
         self.lbl_size.setText(QCoreApplication.translate("MainWindow", u"Dimensioni lastra", None))

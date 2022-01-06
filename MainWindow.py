@@ -53,6 +53,9 @@ class MainWindow(QMainWindow):
     # Says whether the timer to delay the drawing regeneration is active or not
     resize_timer_running = False
 
+    # Contains the ful
+    selected_files_full_string = ''
+
     def __init__(self):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
@@ -66,8 +69,6 @@ class MainWindow(QMainWindow):
         self.scene = MyGraphicsScene()
         # Intercepts the signal emitted and connects it to the mousePosition() method
         self.scene.signalMousePos.connect(self.mousePosition)
-        # Enable the mouse tracking without the need to click
-        self.ui.canvas.setMouseTracking(True)
 
         self.ui.canvas.setScene(self.scene)
         self.ui.canvas.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
@@ -103,12 +104,12 @@ class MainWindow(QMainWindow):
         self.setTabOrder(self.ui.in_tool_speed, self.ui.chk_autoresize)
 
         # Timer to manage the delay when regenerating the drawing when the scene is resized
-        self._resize_timer = QtCore.QTimer(self)
+        self.reset_timer = QtCore.QTimer(self)
         # Set the timer as single shot.
         # I'm not using a a singleshot timer because it doesn't have the stop() method which
         # is required to simulate a reset as implemented in the resizeEvent() method
-        self._resize_timer.setSingleShot(True)
-        self._resize_timer.timeout.connect(self.draw)
+        self.reset_timer.setSingleShot(True)
+        self.reset_timer.timeout.connect(self.draw)
         # Says whether the timer must be used or not
         self.delayEnabled = True
         # Delay in milliseconds
@@ -116,10 +117,11 @@ class MainWindow(QMainWindow):
 
     def resizeEvent(self, event):
         '''
-        Overrides the QMainWindow resizeEvent()
+        Overrides the QMainWindow resizeEvent() called when the window is resized
         '''
         # When the main window is resized, the scen size must be adjusted
         self.scene_w, self.scene_h = self.getCanvasSize()
+        self.ui.lbl_selected_file.setText('')
 
         # If there is something on the scene and the auto-resize is enabled
         if self.iso_drawn and self.ui.chk_autoresize.isChecked():
@@ -128,12 +130,12 @@ class MainWindow(QMainWindow):
                 # If the timer has been started
                 if self.resize_timer_running:
                     # Stop the timer, because the user is still resizing the window
-                    self._resize_timer.stop()
+                    self.reset_timer.stop()
                     # Says that the timer is no more active
                     self.resize_timer_running = False
 
                 # Start the timer
-                self._resize_timer.start(self.delayTimeout)
+                self.reset_timer.start(self.delayTimeout)
                 # Says that the timer is active
                 self.resize_timer_running = True
             # If the timer is not enabled
@@ -141,9 +143,24 @@ class MainWindow(QMainWindow):
                 # Regenerate the drawing
                 self.draw()
 
+        self.elideText(self.ui.lbl_selected_file,
+                       self.selected_files_full_string)
+
+    def elideText(self, label, text):
+        '''
+        Elide a long text to fit the label width
+        '''
+        # Get the metrix for the font used inside the label
+        metrix = QtGui.QFontMetrics(label.font())
+        # Elide the text at a width of 15px less than the label width to leave some padding
+        elideded_text = metrix.elidedText(
+            text, QtCore.Qt.ElideRight, label.width() - 15)
+        # Print the elided text into the label
+        label.setText(elideded_text)
+
     def showEvent(self, event):
         '''
-        Override del metodo chiamato quando la MainWindow è pronta e visualizzata
+        Overrides the QMainWindow resizeEvent() called when the window is shown
         '''
         # Initialize the scene's size to also have a valid position for the mouse pointer
         self.scene_w, self.scene_h = self.getCanvasSize()
@@ -172,13 +189,12 @@ class MainWindow(QMainWindow):
         self.iso_file, _ = QFileDialog.getOpenFileNames(
             self, 'OpenFile', filter=filter)
 
-        # Stirng to print on the selected files label
-        file_output = ''
         for file in self.iso_file:
             filename = os.path.basename(file)
-            file_output += '"' + filename + '" '
+            self.selected_files_full_string += '"' + filename + '" '
 
-        self.ui.lbl_selected_file.setText(file_output)
+        self.elideText(self.ui.lbl_selected_file,
+                       self.selected_files_full_string)
 
     def resetErrors(self):
         '''
@@ -302,6 +318,9 @@ class MainWindow(QMainWindow):
         Reset the scene to the initial state
         Param - boolean draw: if False also reset the selected files
         '''
+        # Remove the scene from the view
+        # this is not really required, but it speeds up the reset process
+        self.ui.canvas.setScene(None)
         # Reset the scene
         self.scene.clear()
         self.scale_factor = 1
@@ -315,9 +334,13 @@ class MainWindow(QMainWindow):
         self.ui.lbl_working_time_value.setText('')
         if not reset_to_draw:
             self.iso_file = ''
+            self.selected_files_full_string = ''
             self.ui.lbl_selected_file.setText('')
         # Says that no drowing is on the scene
         self.iso_drawn = False
+
+        # Reassign the scene to the canvas
+        self.ui.canvas.setScene(self.scene)
 
     def setScene(self):
         '''
@@ -387,9 +410,9 @@ class MainWindow(QMainWindow):
             original_file.close()
 
         num_rows = len(iso)
-            
+
         pd = QProgressDialog('Estrapolazione coordinate',
-                                'Annulla', 0, num_rows-1, self)
+                             'Annulla', 0, num_rows-1, self)
         pd.setModal(True)
         pd.setMinimumDuration(0)
 
@@ -397,7 +420,7 @@ class MainWindow(QMainWindow):
         # result in a very slow execution, this sets the update to be executed once every
         # 1/500 of the total iterations
         progress_step = int(num_rows / 500)
-        
+
         i = 0
 
         # Says if the tool is over the first point where it lowes to engrave
@@ -408,7 +431,7 @@ class MainWindow(QMainWindow):
 
         # Loop over all the rows of the file
         for line_of_code in iso:
-            
+
             if i % progress_step == 0:
                 pd.setValue(i)
 
@@ -529,7 +552,7 @@ class MainWindow(QMainWindow):
                 # When an "up" is found, the last Z coordinate must be read to know how much the tool will be raised
                 # the absolute value of the Z must be considered, since the Z is always negative or 0
                 coords.append(('up', 0, 0))
-            
+
             i += 1
 
         # Check whether the X and/or Y Csomewhere become negative and take everything back to positive values
@@ -556,7 +579,6 @@ class MainWindow(QMainWindow):
                     new_x = float(coords[i][0]) + self.offset_x
                     new_y = float(coords[i][1]) + self.offset_y
                     coords[i] = (new_x, new_y, coords[i][2])
-
 
         pd.setValue(num_rows-1)
 
@@ -646,7 +668,7 @@ class MainWindow(QMainWindow):
             # It is not convenient to update the progress bar at each loop iteration, that would
             # result in a very slow execution, this sets the update to be executed once every
             # 1/500 of the total iterations
-            progress_step = int(num_coords / 400)
+            progress_step = int(num_coords / 200)
 
             for i in range(num_coords):
                 if i % progress_step == 0:
