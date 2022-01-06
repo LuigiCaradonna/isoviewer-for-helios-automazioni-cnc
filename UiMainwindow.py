@@ -66,6 +66,7 @@ class Ui_MainWindow(object):
 
         self.lbl_selected_file = QLabel(self.centralwidget)
         self.lbl_selected_file.setObjectName(u"lbl_selected_file")
+        self.lbl_selected_file.setScaledContents(True)
 
         self.horizontalLayout_2.addWidget(self.lbl_selected_file)
 

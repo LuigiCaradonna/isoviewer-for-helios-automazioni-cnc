@@ -1,5 +1,5 @@
 from PySide6 import (QtCore, QtGui)
-from PySide6.QtWidgets import QMainWindow, QFileDialog, QGraphicsScene, QLabel
+from PySide6.QtWidgets import QMainWindow, QFileDialog, QGraphicsScene, QLabel, QProgressDialog
 from UiMainwindow import Ui_MainWindow
 import os.path
 import math
@@ -68,35 +68,35 @@ class MainWindow(QMainWindow):
         self.scene.signalMousePos.connect(self.mousePosition)
         # Enable the mouse tracking without the need to click
         self.ui.canvas.setMouseTracking(True)
-        
+
         self.ui.canvas.setScene(self.scene)
         self.ui.canvas.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
         self.ui.lbl_x_min_value.setStyleSheet(
-            'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+            'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
         self.ui.lbl_x_max_value.setStyleSheet(
-            'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+            'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
         self.ui.lbl_y_min_value.setStyleSheet(
-            'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+            'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
         self.ui.lbl_y_max_value.setStyleSheet(
-            'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+            'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
         self.ui.lbl_z_max_value.setStyleSheet(
-            'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+            'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
         self.ui.lbl_rectangle_value.setStyleSheet(
-            'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+            'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
         self.ui.lbl_working_time_value.setStyleSheet(
-            'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+            'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
         self.ui.lbl_mouse_pos_x.setStyleSheet(
-            'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+            'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
         self.ui.lbl_mouse_pos_y.setStyleSheet(
-            'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+            'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
         self.ui.lbl_offset_value.setStyleSheet(
-            'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+            'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
         self.ui.lbl_eng_dst_value.setStyleSheet(
-            'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+            'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
         self.ui.lbl_pos_dst_value.setStyleSheet(
-            'background-color: #DDDDDD; border: 1px solid #BBBBBB')
+            'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
         # To center the checkbox
-        self.ui.chk_autoresize.setStyleSheet("padding-left:20px")
+        self.ui.chk_autoresize.setStyleSheet("padding-left:20px;")
 
         self.setTabOrder(self.ui.in_width, self.ui.in_height)
         self.setTabOrder(self.ui.in_height, self.ui.in_tool_speed)
@@ -169,8 +169,9 @@ class MainWindow(QMainWindow):
         # Filter to show only PGR files
         filter = "pgr(*.PGR)"
         # Allows multiple files selection
-        self.iso_file, _ = QFileDialog.getOpenFileNames(self, 'OpenFile', filter=filter)
-        
+        self.iso_file, _ = QFileDialog.getOpenFileNames(
+            self, 'OpenFile', filter=filter)
+
         # Stirng to print on the selected files label
         file_output = ''
         for file in self.iso_file:
@@ -197,8 +198,10 @@ class MainWindow(QMainWindow):
         for file in self.iso_file:
             # Verify that the file exists and has the proper extension
             if not os.path.isfile(file) or not file[-3:] == 'PGR':
-                self.ui.lbl_selected_file.setStyleSheet("border: 1px solid red")
-                self.ui.statusbar.showMessage('Selezionare solo file ISO validi')
+                self.ui.lbl_selected_file.setStyleSheet(
+                    "border: 1px solid red")
+                self.ui.statusbar.showMessage(
+                    'Selezionare solo file ISO validi')
                 return False
             # If the file exists and it has the PGR extension
             else:
@@ -356,51 +359,126 @@ class MainWindow(QMainWindow):
             # Draw a rectangle defining it
             self.scene.addRect(QtCore.QRectF(0, 0, self.scene_w, self.scene_h))
 
+    def cancelDrawing(self):
+        '''
+        Resets the both scene and the scene and the limits
+        '''
+        self.resetScene()
+        self.resetCoordinatesLimits()
+
     def getCoordinates(self):
         '''
-        Read the ISO file and gets the coordinate useful for the drawing
+        Read the ISO files and gets the coordinates useful for the drawing
         '''
-        
+
         # Reset the min and max values
         self.resetCoordinatesLimits()
         # List containing the useful coordinates
         coords = []
 
-        for file in self.iso_file:
-            # Says if the tool is over the first point where it lowes to engrave
-            first_down = False
-            # The position where the engraving starts is after the second G12 Z0
-            # thi variable is a counter to recognize it
-            z_down = 0
+        iso = []
 
+        for file in self.iso_file:
             # Opens the ISO file
             original_file = open(file, 'r')
             # Copy the file content
-            iso = original_file.readlines()
+            iso += original_file.readlines()
             # Close the file
             original_file.close()
 
-            # Loop over all the rows of the file
-            for line_of_code in iso:
-                # Rows starting with G02 X indicate positions which produce engravings - i.e.: G02 X508 Y556 Z-13
-                if line_of_code.find('G02 X') == 0:
-                    # Split the code
-                    subline = line_of_code.split(' ')
+        num_rows = len(iso)
+            
+        pd = QProgressDialog('Estrapolazione coordinate',
+                                'Annulla', 0, num_rows-1, self)
+        pd.setModal(True)
+        pd.setMinimumDuration(0)
 
-                    # The second element is the X coordinate, remove the first character (X)
-                    # limit the number to 3 decimals
-                    x = float('{:.3f}'.format(float(subline[1][1:])))
+        # It is not convenient to update the progress bar at each loop iteration, that would
+        # result in a very slow execution, this sets the update to be executed once every
+        # 1/500 of the total iterations
+        progress_step = int(num_rows / 500)
+        
+        i = 0
 
+        # Says if the tool is over the first point where it lowes to engrave
+        first_down = False
+        # The position where the engraving starts is after the second G12 Z0
+        # thi variable is a counter to recognize it
+        z_down = 0
+
+        # Loop over all the rows of the file
+        for line_of_code in iso:
+            
+            if i % progress_step == 0:
+                pd.setValue(i)
+
+                if pd.wasCanceled():
+                    self.cancelDrawing()
+                    break
+
+            # Rows starting with G02 X indicate positions which produce engravings - i.e.: G02 X508 Y556 Z-13
+            if line_of_code.find('G02 X') == 0:
+                # Split the code
+                subline = line_of_code.split(' ')
+
+                # The second element is the X coordinate, remove the first character (X)
+                # limit the number to 3 decimals
+                x = float('{:.3f}'.format(float(subline[1][1:])))
+
+                # Update the x min
+                if x <= self.x_min:
+                    self.x_min = x
+                # Update the x max
+                if x >= self.x_max:
+                    self.x_max = x
+
+                # The third element is the Y coordinate, remove the first character (Y)
+                # limit the number to 3 decimals
+                y = float('{:.3f}'.format(float(subline[2][1:])))
+
+                # Update the y min
+                if y <= self.y_min:
+                    self.y_min = y
+                # Update the y max
+                if y >= self.y_max:
+                    self.y_max = y
+
+                # The fourth element is the Z coordinate, remove the first character (Z)
+                # limit the number to 3 decimals
+                z = float('{:.3f}'.format(float(subline[3][1:])))
+                # Update the z max
+                if z < self.z_max:
+                    self.z_max = z
+
+                # Add the coordinates to the list
+                coords.append((x, y, z))
+
+            # Rows starting with G12 X indicate a repositioning over the XY plane
+            elif line_of_code.find('G12 X') == 0:
+                # Considering the positioning, X an Y min/max must not be calculated from where the tool starts
+                # or X and Y min would always be 0 since it is the origin of the job, they must be considered
+                # from the next position, that is where the the tool lowers for the first time to engrave.
+                # It is not sure that this will be the min or max, but it is a valid position to consider.
+
+                # Split the code
+                subline = line_of_code.split(' ')
+
+                # The second element is the X coordinate, remove the first character (X)
+                # limit the number to 3 decimals
+                x = float('{:.3f}'.format(float(subline[1][1:])))
+
+                # The third element is the Y coordinate, remove the first character (Y)
+                # limit the number to 3 decimals
+                y = float('{:.3f}'.format(float(subline[2][1:])))
+
+                # If this is the first place where the tool lowers to engrave
+                if first_down:
                     # Update the x min
                     if x <= self.x_min:
                         self.x_min = x
                     # Update the x max
                     if x >= self.x_max:
                         self.x_max = x
-
-                    # The third element is the Y coordinate, remove the first character (Y)
-                    # limit the number to 3 decimals
-                    y = float('{:.3f}'.format(float(subline[2][1:])))
 
                     # Update the y min
                     if y <= self.y_min:
@@ -409,92 +487,50 @@ class MainWindow(QMainWindow):
                     if y >= self.y_max:
                         self.y_max = y
 
-                    # The fourth element is the Z coordinate, remove the first character (Z)
-                    # limit the number to 3 decimals
-                    z = float('{:.3f}'.format(float(subline[3][1:])))
-                    # Update the z max
-                    if z < self.z_max:
-                        self.z_max = z
+                    # Reset the flag, from now on it will not be used anymore
+                    first_down = False
 
-                    # Add the coordinates to the list
-                    coords.append((x, y, z))
+                # Add the coordinates to the list, this will always be preceded by an "up"
+                coords.append((x, y, 0))
 
-                # Rows starting with G12 X indicate a repositioning over the XY plane
-                elif line_of_code.find('G12 X') == 0:
-                    # Considering the positioning, X an Y min/max must not be calculated from where the tool starts
-                    # or X and Y min would always be 0 since it is the origin of the job, they must be considered
-                    # from the next position, that is where the the tool lowers for the first time to engrave.
-                    # It is not sure that this will be the min or max, but it is a valid position to consider.
+            # Rows starting with G02 Z indicate the only vertical movement to start to engrave
+            elif line_of_code.find('G02 Z') == 0:
+                # Split the code
+                subline = line_of_code.split(' ')
 
-                    # Split the code
-                    subline = line_of_code.split(' ')
+                # Says that the next coordinate will be the tool lowering
+                coords.append(('down', 0, 0))
 
-                    # The second element is the X coordinate, remove the first character (X)
-                    # limit the number to 3 decimals
-                    x = float('{:.3f}'.format(float(subline[1][1:])))
+                # Says how much the tool lowers
+                coords.append(
+                    (0, 0, float('{:.3f}'.format(float(subline[1][1:])))))
 
-                    # The third element is the Y coordinate, remove the first character (Y)
-                    # limit the number to 3 decimals
-                    y = float('{:.3f}'.format(float(subline[2][1:])))
+            # Rows starting with G12 Z0 indicate the only vertical movement to raise the tool from the working plane
+            elif line_of_code.find('G12 Z0') == 0:
+                # If the second G12 Z0 has not yet been found
+                if z_down < 2:
+                    # Increment the counter
+                    z_down += 1
+                # If the second G12 Z0 has just been found
+                if z_down == 2:
+                    # Set the flag to True to say that here the tool will lower for the first time
+                    first_down = True
 
-                    # If this is the first place where the tool lowers to engrave
-                    if first_down:
-                        # Update the x min
-                        if x <= self.x_min:
-                            self.x_min = x
-                        # Update the x max
-                        if x >= self.x_max:
-                            self.x_max = x
-
-                        # Update the y min
-                        if y <= self.y_min:
-                            self.y_min = y
-                        # Update the y max
-                        if y >= self.y_max:
-                            self.y_max = y
-
-                        # Reset the flag, from now on it will not be used anymore
-                        first_down = False
-
-                    # Add the coordinates to the list, this will always be preceded by an "up"
-                    coords.append((x, y, 0))
-
-                # Rows starting with G02 Z indicate the only vertical movement to start to engrave
-                elif line_of_code.find('G02 Z') == 0:
-                    # Split the code
-                    subline = line_of_code.split(' ')
-
-                    # Says that the next coordinate will be the tool lowering
-                    coords.append(('down', 0, 0))
-
-                    # Says how much the tool lowers
-                    coords.append(
-                        (0, 0, float('{:.3f}'.format(float(subline[1][1:])))))
-
-                # Rows starting with G12 Z0 indicate the only vertical movement to raise the tool from the working plane
-                elif line_of_code.find('G12 Z0') == 0:
-                    # If the second G12 Z0 has not yet been found
-                    if z_down < 2:
-                        # Increment the counter
-                        z_down += 1
-                    # If the second G12 Z0 has just been found
-                    if z_down == 2:
-                        # Set the flag to True to say that here the tool will lower for the first time
-                        first_down = True
-
-                    # Example
-                    # G02 X100 Y0 Z-10
-                    # G02 X0 Y0 Z-10
-                    # G12 Z0
-                    # G12 X150 Y100
-                    # G02 Z-10
-                    # G02 X150 Y200 Z-10
-                    # In this case, the coordinates list would contain
-                    # ((100, 0), (0, 0), (150, 100))
-                    # but the segment from (0, 0) to (150, 100) must not be drawn, thus "up" will indicate this situation.
-                    # When an "up" is found, the last Z coordinate must be read to know how much the tool will be raised
-                    # the absolute value of the Z must be considered, since the Z is always negative or 0
-                    coords.append(('up', 0, 0))
+                # Example
+                # G02 X100 Y0 Z-10
+                # G02 X0 Y0 Z-10
+                # G12 Z0
+                # G12 X150 Y100
+                # G02 Z-10
+                # G02 X150 Y200 Z-10
+                # In this case, the coordinates list would contain
+                # ((100, 0), (0, 0), (150, 100))
+                # but the segment from (0, 0) to (150, 100) must not be drawn, thus "up" will indicate this situation.
+                # When an "up" is found, the last Z coordinate must be read to know how much the tool will be raised
+                # the absolute value of the Z must be considered, since the Z is always negative or 0
+                coords.append(('up', 0, 0))
+            
+            i += 1
 
         # Check whether the X and/or Y Csomewhere become negative and take everything back to positive values
         # or it will not be possible to draw on the scene, which only accepts positive coordinates
@@ -520,6 +556,9 @@ class MainWindow(QMainWindow):
                     new_x = float(coords[i][0]) + self.offset_x
                     new_y = float(coords[i][1]) + self.offset_y
                     coords[i] = (new_x, new_y, coords[i][2])
+
+
+        pd.setValue(num_rows-1)
 
         # Return the list
         return coords
@@ -596,10 +635,27 @@ class MainWindow(QMainWindow):
             lowering = False
             # Says if the tool is engraving
             drawing = False
-            # Says if a positioning is required
+            # Says if a repositioning is required
             repositioning = False
 
+            pd = QProgressDialog('Elaborazione primitive',
+                                 'Annulla', 0, num_coords-1, self)
+            pd.setModal(True)
+            pd.setMinimumDuration(0)
+
+            # It is not convenient to update the progress bar at each loop iteration, that would
+            # result in a very slow execution, this sets the update to be executed once every
+            # 1/500 of the total iterations
+            progress_step = int(num_coords / 500)
+
             for i in range(num_coords):
+                if i % progress_step == 0:
+                    pd.setValue(i)
+
+                    if pd.wasCanceled():
+                        self.cancelDrawing()
+                        break
+
                 # If this is not the end of the file and the tool must be raised
                 # that means that the next movement will be to position the tool
                 if i < num_coords and coords[i][0] == 'up':
@@ -727,6 +783,7 @@ class MainWindow(QMainWindow):
                     # Terminate the iteration
                     continue
 
+            pd.setValue(num_coords-1)
             # Says that there is something on the scene
             self.iso_drawn = True
             # Estimate the woking time
