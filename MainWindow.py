@@ -646,7 +646,7 @@ class MainWindow(QMainWindow):
             # It is not convenient to update the progress bar at each loop iteration, that would
             # result in a very slow execution, this sets the update to be executed once every
             # 1/500 of the total iterations
-            progress_step = int(num_coords / 500)
+            progress_step = int(num_coords / 400)
 
             for i in range(num_coords):
                 if i % progress_step == 0:
