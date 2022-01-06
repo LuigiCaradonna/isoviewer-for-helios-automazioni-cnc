@@ -110,7 +110,7 @@
           <item>
            <widget class="QLabel" name="lbl_selected_file">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>

@@ -121,8 +121,6 @@ class MainWindow(QMainWindow):
         '''
         # When the main window is resized, the scen size must be adjusted
         self.scene_w, self.scene_h = self.getCanvasSize()
-        # Delete the selected files label content
-        self.ui.lbl_selected_file.setText('')
 
         # If there is something on the scene and the auto-resize is enabled
         if self.iso_drawn and self.ui.chk_autoresize.isChecked():
@@ -154,10 +152,10 @@ class MainWindow(QMainWindow):
         # Get the metrix for the font used inside the label
         metrix = QtGui.QFontMetrics(label.font())
         # Elide the text at a width of 15px less than the label width to leave some padding
-        elideded_text = metrix.elidedText(
+        elided_text = metrix.elidedText(
             text, QtCore.Qt.ElideRight, label.width() - 15)
         # Print the elided text into the label
-        label.setText(elideded_text)
+        label.setText(elided_text)
 
     def showEvent(self, event):
         '''

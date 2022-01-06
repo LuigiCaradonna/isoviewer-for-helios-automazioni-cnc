@@ -67,7 +67,7 @@ class Ui_MainWindow(object):
 
         self.lbl_selected_file = QLabel(self.centralwidget)
         self.lbl_selected_file.setObjectName(u"lbl_selected_file")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.lbl_selected_file.sizePolicy().hasHeightForWidth())
