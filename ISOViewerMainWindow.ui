@@ -241,8 +241,8 @@
          </item>
          <item>
           <layout class="QGridLayout" name="gridLayout_4">
-           <item row="0" column="1">
-            <widget class="QLabel" name="lbl_height">
+           <item row="10" column="0">
+            <widget class="QLabel" name="lbl_eng_dst">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -261,8 +261,11 @@
                <pointsize>12</pointsize>
               </font>
              </property>
+             <property name="toolTip">
+              <string>Distanza incisioni</string>
+             </property>
              <property name="text">
-              <string>A (mm)</string>
+              <string>Inc. dst</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -290,6 +293,34 @@
              </property>
              <property name="text">
               <string>0</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLabel" name="lbl_height">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <family>Courier New</family>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>A (mm)</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -351,70 +382,6 @@
              </property>
             </widget>
            </item>
-           <item row="10" column="0">
-            <widget class="QLabel" name="lbl_eng_dst">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>21</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>21</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Courier New</family>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-             <property name="toolTip">
-              <string>Distanza incisioni</string>
-             </property>
-             <property name="text">
-              <string>Inc. dst</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QCheckBox" name="chk_autoresize">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>21</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>21</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Resize</string>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>16</width>
-               <height>16</height>
-              </size>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
            <item row="2" column="0">
             <widget class="QLabel" name="lbl_tool_speed">
              <property name="minimumSize">
@@ -470,8 +437,8 @@
              </property>
             </widget>
            </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="lbl_x_min_value">
+           <item row="3" column="1">
+            <widget class="QCheckBox" name="chk_autoresize">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -486,102 +453,20 @@
              </property>
              <property name="font">
               <font>
-               <family>Courier New</family>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-             <property name="midLineWidth">
-              <number>1</number>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="1">
-            <widget class="QLabel" name="lbl_y_min_value">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>21</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>21</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Courier New</family>
                <pointsize>12</pointsize>
               </font>
              </property>
              <property name="text">
-              <string/>
+              <string>Autoresize</string>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QLabel" name="lbl_y_min">
-             <property name="minimumSize">
+             <property name="iconSize">
               <size>
-               <width>0</width>
-               <height>21</height>
+               <width>16</width>
+               <height>16</height>
               </size>
              </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>21</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Courier New</family>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Y min</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignBottom|Qt::AlignHCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="lbl_x_max">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>21</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>21</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Courier New</family>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>X max</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -610,62 +495,6 @@
              </property>
              <property name="text">
               <string>Z max</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="0">
-            <widget class="QLabel" name="lbl_x_max_value">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>21</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>21</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Courier New</family>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="1">
-            <widget class="QLabel" name="lbl_y_max_value">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>21</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>21</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Courier New</family>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string/>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -722,6 +551,65 @@
              </property>
              <property name="text">
               <string>Offset</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="1">
+            <widget class="QLabel" name="lbl_y_max_value">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <family>Courier New</family>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="1">
+            <widget class="QLabel" name="lbl_pos_dst">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <family>Courier New</family>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="toolTip">
+              <string>Distanza posizionamenti</string>
+             </property>
+             <property name="text">
+              <string>Pos. dst</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -812,8 +700,8 @@
              </property>
             </widget>
            </item>
-           <item row="10" column="1">
-            <widget class="QLabel" name="lbl_pos_dst">
+           <item row="11" column="1">
+            <widget class="QLabel" name="lbl_pos_dst_value">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -832,11 +720,8 @@
                <pointsize>12</pointsize>
               </font>
              </property>
-             <property name="toolTip">
-              <string>Distanza posizionamenti</string>
-             </property>
              <property name="text">
-              <string>Pos. dst</string>
+              <string/>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -871,8 +756,123 @@
              </property>
             </widget>
            </item>
-           <item row="11" column="1">
-            <widget class="QLabel" name="lbl_pos_dst_value">
+           <item row="5" column="0">
+            <widget class="QLabel" name="lbl_x_min_value">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <family>Courier New</family>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="midLineWidth">
+              <number>1</number>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="lbl_y_min">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <family>Courier New</family>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Y min</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QLabel" name="lbl_x_max">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <family>Courier New</family>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>X max</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QLabel" name="lbl_x_max_value">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <family>Courier New</family>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0">
+            <widget class="QLabel" name="lbl_y_min_value">
              <property name="minimumSize">
               <size>
                <width>0</width>
