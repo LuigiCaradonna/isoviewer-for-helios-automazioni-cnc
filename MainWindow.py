@@ -97,7 +97,7 @@ class MainWindow(QMainWindow):
         self.ui.lbl_pos_dst_value.setStyleSheet(
             'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
         # To center the checkbox
-        self.ui.chk_autoresize.setStyleSheet("padding-left:20px;")
+        self.ui.chk_autoresize.setStyleSheet("padding-left:5px;")
 
         self.setTabOrder(self.ui.in_width, self.ui.in_height)
         self.setTabOrder(self.ui.in_height, self.ui.in_tool_speed)
