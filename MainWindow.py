@@ -61,17 +61,24 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        # Sets an icon for the window
         self.setWindowIcon(QtGui.QIcon('favicon.png'))
 
+        # Binds the buttons to the corresponding method to fire
         self.ui.btn_draw.clicked.connect(self.draw)
         self.ui.btn_reset.clicked.connect(self.resetScene)
         self.ui.btn_browse_file.clicked.connect(self.browseFile)
+        # Instantiates a scene
         self.scene = MyGraphicsScene()
         # Intercepts the signal emitted and connects it to the mousePosition() method
         self.scene.signalMousePos.connect(self.mousePosition)
 
+        # Assign the scene to the canvas
         self.ui.canvas.setScene(self.scene)
+        # Set the canvas alignment
         self.ui.canvas.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
+
+        # Input fields and labels styling
         self.ui.lbl_x_min_value.setStyleSheet(
             'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
         self.ui.lbl_x_max_value.setStyleSheet(
@@ -99,14 +106,18 @@ class MainWindow(QMainWindow):
         # To center the checkbox
         self.ui.chk_autoresize.setStyleSheet("padding-left:5px;")
 
+        # Set the focusing order for the input fields when the tab key is pressed
+        # in_width -> in_height
         self.setTabOrder(self.ui.in_width, self.ui.in_height)
+        # in_height -> in_tool_speed
         self.setTabOrder(self.ui.in_height, self.ui.in_tool_speed)
+        # in_tool_speed -> chk_autoresize
         self.setTabOrder(self.ui.in_tool_speed, self.ui.chk_autoresize)
 
         # Timer to manage the delay when regenerating the drawing when the scene is resized
         self.reset_timer = QtCore.QTimer(self)
         # Set the timer as single shot.
-        # I'm not using a a singleshot timer because it doesn't have the stop() method which
+        # I'm not using a singleshot timer because it doesn't have the stop() method which
         # is required to simulate a reset as implemented in the resizeEvent() method
         self.reset_timer.setSingleShot(True)
         self.reset_timer.timeout.connect(self.draw)
@@ -164,14 +175,16 @@ class MainWindow(QMainWindow):
         # Initialize the scene's size to also have a valid position for the mouse pointer
         self.scene_w, self.scene_h = self.getCanvasSize()
 
-        # print(str(self.scene_w) + ' X ' + str(self.scene_h))
-
     def getCanvasSize(self):
-        '''Returns the visible size of the canvas'''
+        '''
+        Returns the visible size of the canvas, applying a compensation for the px difference introduced by the antialiasing if necessary
+        '''
         return (self.ui.canvas.width() - self.canvas_expanded, self.ui.canvas.height() - self.canvas_expanded)
 
     def resetCoordinatesLimits(self):
-        '''Resets the min and max values'''
+        '''
+        Resets the coordinates' min and max values and the offsets
+        '''
         self.x_min = 10000
         self.y_min = 10000
         self.z_max = 0
@@ -181,17 +194,21 @@ class MainWindow(QMainWindow):
         self.offset_y = 0
 
     def browseFile(self):
-        '''Opens the file browser'''
+        '''
+        Opens the file browser
+        '''
         # Filter to show only PGR files
         filter = "pgr(*.PGR)"
         # Allows multiple files selection
         self.iso_files, _ = QFileDialog.getOpenFileNames(
             self, 'OpenFile', filter=filter)
 
+        # Builds the string containing all the names of the selected files
         for file in self.iso_files:
             filename = os.path.basename(file)
             self.selected_files_full_string += '"' + filename + '" '
 
+        # Elides, if necessary, the string to fit the selected files label and prints it
         self.elideText(self.ui.lbl_selected_file,
                        self.selected_files_full_string)
 
@@ -383,7 +400,7 @@ class MainWindow(QMainWindow):
 
     def cancelDrawing(self):
         '''
-        Resets the both scene and the scene and the limits
+        Resets the both the scene and the coordinates' limits
         '''
         self.resetScene()
         self.resetCoordinatesLimits()
@@ -398,18 +415,21 @@ class MainWindow(QMainWindow):
         # List containing the useful coordinates
         coords = []
 
+        # List of all the instructions contained inside the selected files
         iso = []
 
+        # For each selected file
         for file in self.iso_files:
             # Opens the ISO file
             original_file = open(file, 'r')
-            # Copy the file content
+            # Add the file content to the list of instructions
             iso += original_file.readlines()
             # Close the file
             original_file.close()
 
         num_rows = len(iso)
 
+        # Progress dialog shown while processing the list of instructions
         pd = QProgressDialog('Estrapolazione coordinate',
                              'Annulla', 0, num_rows-1, self)
         pd.setModal(True)
@@ -420,22 +440,28 @@ class MainWindow(QMainWindow):
         # 1/500 of the total iterations
         progress_step = int(num_rows / 500)
 
+        # Counter for the prograss dialog
         i = 0
 
         # Says if the tool is over the first point where it lowes to engrave
         first_down = False
         # The position where the engraving starts is after the second G12 Z0
-        # thi variable is a counter to recognize it
+        # the variable is a counter to recognize it
         z_down = 0
 
-        # Loop over all the rows of the file
+        # Loop over all the rows of the list of instructions
         for line_of_code in iso:
 
+            # If 1/500 of the instructions have been processed
             if i % progress_step == 0:
+                # Update the progress dialog
                 pd.setValue(i)
 
+                # If the cancel button of the progress dialog was clicked
                 if pd.wasCanceled():
+                    # Abort the drawing resetting the changed variables
                     self.cancelDrawing()
+                    # Stop the loop
                     break
 
             # Rows starting with G02 X indicate positions which produce engravings - i.e.: G02 X508 Y556 Z-13
@@ -588,10 +614,13 @@ class MainWindow(QMainWindow):
         '''
         Estimates the working time
         '''
+        # Total distance in millimiters
         tot_dst = eng_dst + pos_dst
 
+        # Seconds to complete the job (distance is in mm, speed in mm/min)
         seconds = (tot_dst / float(self.ui.in_tool_speed.text())) * 60
 
+        # Estimated time formatted and printed to the corresponding label
         self.ui.lbl_working_time_value.setText(
             time.strftime('%H:%M:%S', time.gmtime(seconds)))
 
@@ -599,12 +628,12 @@ class MainWindow(QMainWindow):
         '''
         Gets and shows the mouse pointer coordinates
         '''
+        # X coordinate
         self.ui.lbl_mouse_pos_x.setText(
             str('{:.1f}'.format(float(pos.x() * (1/self.scale_factor)))))
+        # Y coordinate
         self.ui.lbl_mouse_pos_y.setText(
             str('{:.1f}'.format(float((self.scene_h - pos.y()) * (1/self.scale_factor)))))
-
-        # print('x: ' + str(int(pos.x())) + ' | y: ' + str(int(pos.y())))
 
     def draw(self):
         '''
@@ -613,9 +642,12 @@ class MainWindow(QMainWindow):
 
         self.resetErrors()
 
+        # If all the inputs are correct
         if self.checkData():
+            # List of coordinates extracted by the iso files
             coords = self.getCoordinates()
             num_coords = len(coords)
+            # Prepare the scene
             self.setScene()
 
             # Limit the valueas to the 3 decimals and print them on the proper label
@@ -659,6 +691,7 @@ class MainWindow(QMainWindow):
             # Says if a repositioning is required
             repositioning = False
 
+            # Progress dialog to show while processing the list of coordinates
             pd = QProgressDialog('Elaborazione primitive',
                                  'Annulla', 0, num_coords-1, self)
             pd.setModal(True)
@@ -666,15 +699,21 @@ class MainWindow(QMainWindow):
 
             # It is not convenient to update the progress bar at each loop iteration, that would
             # result in a very slow execution, this sets the update to be executed once every
-            # 1/500 of the total iterations
+            # 1/200 of the total iterations
             progress_step = int(num_coords / 200)
 
             for i in range(num_coords):
+
+                # If 1/200 of the instructions have been processed
                 if i % progress_step == 0:
+                    # Update the progress dialog
                     pd.setValue(i)
 
+                    # If the cancel button of the progress dialog was clicked
                     if pd.wasCanceled():
+                        # Abort the drawing resetting the changed variables
                         self.cancelDrawing()
+                        # Stop the loop
                         break
 
                 # If this is not the end of the file and the tool must be raised
