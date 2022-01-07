@@ -102,8 +102,13 @@
               <height>31</height>
              </size>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
             <property name="text">
-             <string>Load ISO file</string>
+             <string>Load files</string>
             </property>
            </widget>
           </item>
@@ -142,7 +147,7 @@
             </property>
             <property name="font">
              <font>
-              <pointsize>14</pointsize>
+              <pointsize>12</pointsize>
              </font>
             </property>
             <property name="text">
@@ -166,7 +171,7 @@
             </property>
             <property name="font">
              <font>
-              <pointsize>14</pointsize>
+              <pointsize>12</pointsize>
              </font>
             </property>
             <property name="text">
@@ -265,7 +270,7 @@
               <string>Distanza incisioni</string>
              </property>
              <property name="text">
-              <string>Inc. dst</string>
+              <string>DST Inc.</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -402,6 +407,9 @@
                <pointsize>12</pointsize>
               </font>
              </property>
+             <property name="toolTip">
+              <string>Velocità avanzamento utensile</string>
+             </property>
              <property name="text">
               <string>mm/min</string>
              </property>
@@ -455,6 +463,9 @@
               <font>
                <pointsize>12</pointsize>
               </font>
+             </property>
+             <property name="toolTip">
+              <string>Rigenera il disegno al ridimensionamento della finestra</string>
              </property>
              <property name="text">
               <string>Autoresize</string>
@@ -549,6 +560,9 @@
                <pointsize>12</pointsize>
               </font>
              </property>
+             <property name="toolTip">
+              <string>Assi traslati per posizioni negative</string>
+             </property>
              <property name="text">
               <string>Offset</string>
              </property>
@@ -609,7 +623,7 @@
               <string>Distanza posizionamenti</string>
              </property>
              <property name="text">
-              <string>Pos. dst</string>
+              <string>DST Pos.</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -921,8 +935,11 @@
              <pointsize>12</pointsize>
             </font>
            </property>
+           <property name="toolTip">
+            <string>Dimensione rettangolo circoscritto alla lavorazione</string>
+           </property>
            <property name="text">
-            <string>Ingombro lavorazione</string>
+            <string>Area lavorazione</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignBottom|Qt::AlignHCenter</set>
