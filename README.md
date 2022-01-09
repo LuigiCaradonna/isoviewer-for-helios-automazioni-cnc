@@ -5,8 +5,8 @@ This software reads proprietary GCode files, specifically for CNC machines manuf
 ## Features
 - Import multiple files at once
 - Possibility to specify the working area size
-- The path automatically fits the visible area
-- Option to automatically regenarate the drawing on main window resizing to fit the new size of the visible area
+- The drawn path automatically fits the visible area
+- Option to automatically regenarate the drawing, when the main window is resized, to fit the new size of the visible area
 - Calculation of the distance traveled both for repositionings and millings
 - Estimate of the working time given the speed of the tool (not reliable)
 
@@ -14,7 +14,7 @@ About the working time, the reason why it is not currently reliable, is that the
 Where the job is at a constant depth the time results to be almost correct. 
 
 ## Tech
-The whole software is written in `Python` using `PySide6` to build the user interface.
+The whole software is written in `Python`, using `PySide6` to build the user interface.
 
 ## How to compile
 To compile the software, `Python 3.8+`, `Qt 6.0+` and `PySide6` are required.
@@ -23,5 +23,5 @@ The main file in this project is `Isoviewer.py`.
 
 ## Installation
 Inside the folder `dist` the latest compiled version of the software for Windows is available in a zip format.
-There is no need to install the sofware, it is stand-alone.
+There is no need to install the software.
 Unpack the zip package, inside the folder `Isoviewer`, find and run the file `Isoviewer.exe`.
