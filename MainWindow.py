@@ -1,5 +1,5 @@
 from PySide6 import (QtCore, QtGui)
-from PySide6.QtWidgets import QMainWindow, QFileDialog, QGraphicsScene, QLabel, QProgressDialog
+from PySide6.QtWidgets import QMainWindow, QFileDialog, QGraphicsScene, QProgressDialog
 from UiMainwindow import Ui_MainWindow
 import os.path
 import math
@@ -8,13 +8,13 @@ import time
 
 class MyGraphicsScene(QGraphicsScene):
 
-    # Dichiaro un segnale
+    # Declares a signal
     signalMousePos = QtCore.Signal(QtCore.QPointF)
 
-    # Override della funzione mouseMoveEvent per emettere il segnale custom
+    # Override of the method mouseMoveEvent to emit a custom signal
     def mouseMoveEvent(self, event):
         pos = event.lastScenePos()
-        # Emetto il segnale passandogli la posizione del mouse
+        # Emits the signal passing the mouse posizion
         self.signalMousePos.emit(pos)
 
 
@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
 
     iso_files = ''
     scale_factor = 1
-    # Dimensioni della scena
+    # Scene size
     scene_w = 0
     scene_h = 0
 
