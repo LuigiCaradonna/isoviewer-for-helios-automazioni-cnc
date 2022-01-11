@@ -1,6 +1,8 @@
-# Isoviewer
+# Isoviewer for Helios Automazioni srl CNC Machines
 
-This software reads proprietary GCode files, specifically for CNC machines manufactured by [Helios Automazioni](https://www.heliosautomazioni.com/it/home-it.html) and shows the path followed by the tools to engrave, cut or mill.
+> This is **not** an official software developed by [Helios Automazioni srl](https://www.heliosautomazioni.com/it/home-it.html)
+
+This software reads proprietary GCode files with PGR extension and shows the path followed by the tools to engrave, cut or mill.
 
 ## Features
 - Import multiple files at once
