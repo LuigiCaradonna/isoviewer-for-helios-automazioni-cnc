@@ -521,6 +521,7 @@ class MainWindow(QMainWindow):
 
                 # If this is the first place where the tool lowers to engrave
                 if first_down:
+                    print(f"First down - X: {x} | Y: {y}")
                     # Update the x min
                     if x <= self.x_min:
                         self.x_min = x
@@ -563,6 +564,8 @@ class MainWindow(QMainWindow):
                 if z_down == 2:
                     # Set the flag to True to say that here the tool will lower for the first time
                     first_down = True
+                    # Increment the counter to have z_down > 2 to not trigger the first_down=True again
+                    z_down += 1
 
                 # Example
                 # G02 X100 Y0 Z-10
