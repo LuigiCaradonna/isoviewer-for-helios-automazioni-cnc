@@ -345,6 +345,8 @@ class MainWindow(QMainWindow):
         self.ui.lbl_y_min_value.setText('')
         self.ui.lbl_y_max_value.setText('')
         self.ui.lbl_z_max_value.setText('')
+        self.ui.lbl_eng_dst_value.setText('')
+        self.ui.lbl_pos_dst_value.setText('')
         self.ui.lbl_rectangle_value.setText('')
         self.ui.lbl_offset_value.setText('')
         self.ui.lbl_working_time_value.setText('')
@@ -440,6 +442,8 @@ class MainWindow(QMainWindow):
         # 1/500 of the total iterations
         progress_step = int(num_rows / 500)
 
+        print(progress_step)
+
         # Counter for the prograss dialog
         i = 0
 
@@ -453,7 +457,7 @@ class MainWindow(QMainWindow):
         for line_of_code in iso:
 
             # If 1/500 of the instructions have been processed
-            if i % progress_step == 0:
+            if progress_step != 0 and i % progress_step == 0:
                 # Update the progress dialog
                 pd.setValue(i)
 
@@ -708,7 +712,7 @@ class MainWindow(QMainWindow):
             for i in range(num_coords):
 
                 # If 1/200 of the instructions have been processed
-                if i % progress_step == 0:
+                if progress_step != 0 and i % progress_step == 0:
                     # Update the progress dialog
                     pd.setValue(i)
 
