@@ -334,12 +334,18 @@ class MainWindow(QMainWindow):
         Reset the scene to the initial state
         Param - boolean draw: if False also reset the selected files
         '''
+        # Remove eventual error notifications
+        self.resetErrors()
+
         # Remove the scene from the view
         # this is not really required, but it speeds up the reset process
         self.ui.canvas.setScene(None)
         # Reset the scene
         self.scene.clear()
         self.scale_factor = 1
+        self.ui.in_width.setText('0')
+        self.ui.in_height.setText('0')
+        self.ui.in_tool_speed.setText('1000')
         self.ui.lbl_x_min_value.setText('')
         self.ui.lbl_x_max_value.setText('')
         self.ui.lbl_y_min_value.setText('')
@@ -441,8 +447,6 @@ class MainWindow(QMainWindow):
         # result in a very slow execution, this sets the update to be executed once every
         # 1/500 of the total iterations
         progress_step = int(num_rows / 500)
-
-        print(progress_step)
 
         # Counter for the prograss dialog
         i = 0
