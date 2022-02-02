@@ -26,8 +26,8 @@ class MainWindow(QMainWindow):
     scene_w = 0
     scene_h = 0
 
-    # Setting the antialiasing for the canvas (active by default)
-    # self.ui.canvas.DontAdjustForAntialiasing(False)
+    # Setting the antialiasing for the canvas, active by default,
+    # (self.ui.canvas.DontAdjustForAntialiasing(False) to disable)
     # the canvas area is extended by 4 pixels over the visible area, and the mouse position
     # is offset by 4px, this will compensate this difference. Must be set to 0
     # if the antialiasing is not in use
@@ -66,7 +66,7 @@ class MainWindow(QMainWindow):
 
         # Binds the buttons to the corresponding method to fire
         self.ui.btn_draw.clicked.connect(self.draw)
-        self.ui.btn_reset.clicked.connect(self.resetScene)
+        self.ui.btn_reset.clicked.connect(self.fullReset)
         self.ui.btn_browse_file.clicked.connect(self.browseFile)
         # Instantiates a scene
         self.scene = MyGraphicsScene()
@@ -105,6 +105,7 @@ class MainWindow(QMainWindow):
             'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
         # To center the checkbox
         self.ui.chk_autoresize.setStyleSheet("padding-left:5px;")
+        self.ui.chk_sculpture.setStyleSheet("padding-left:14px;")
 
         # Set the focusing order for the input fields when the tab key is pressed
         # in_width -> in_height
@@ -113,6 +114,8 @@ class MainWindow(QMainWindow):
         self.setTabOrder(self.ui.in_height, self.ui.in_tool_speed)
         # in_tool_speed -> chk_autoresize
         self.setTabOrder(self.ui.in_tool_speed, self.ui.chk_autoresize)
+        # chk_autoresize -> chk_sculpture
+        self.setTabOrder(self.ui.chk_autoresize, self.ui.chk_sculpture)
 
         # Timer to manage the delay when regenerating the drawing when the scene is resized
         self.reset_timer = QtCore.QTimer(self)
@@ -329,23 +332,24 @@ class MainWindow(QMainWindow):
         # Return the smallest scale factor
         return scale_x if scale_x <= scale_y else scale_y
 
+    def fullReset(self):
+        self.resetErrors()
+        self.resetScene()
+        self.ui.in_width.setText('0')
+        self.ui.in_height.setText('0')
+        self.ui.in_tool_speed.setText('1000')
+
     def resetScene(self, reset_to_draw=False):
         '''
         Reset the scene to the initial state
         Param - boolean draw: if False also reset the selected files
         '''
-        # Remove eventual error notifications
-        self.resetErrors()
-
         # Remove the scene from the view
         # this is not really required, but it speeds up the reset process
         self.ui.canvas.setScene(None)
         # Reset the scene
         self.scene.clear()
         self.scale_factor = 1
-        self.ui.in_width.setText('0')
-        self.ui.in_height.setText('0')
-        self.ui.in_tool_speed.setText('1000')
         self.ui.lbl_x_min_value.setText('')
         self.ui.lbl_x_max_value.setText('')
         self.ui.lbl_y_min_value.setText('')
@@ -434,6 +438,13 @@ class MainWindow(QMainWindow):
             iso += original_file.readlines()
             # Close the file
             original_file.close()
+
+        # The PGR files conatining a sculpture are slightly different from a general one
+        # If the file to show contains a sculpture (the user has to tell us)
+        if self.ui.chk_sculpture.isChecked():
+            # Add this two lines to adapt it to a general PGR file
+            iso.insert(5,'G12 Z0')
+            iso.insert(7,'G02 Z-10')
 
         num_rows = len(iso)
 
@@ -529,7 +540,6 @@ class MainWindow(QMainWindow):
 
                 # If this is the first place where the tool lowers to engrave
                 if first_down:
-                    print(f"First down - X: {x} | Y: {y}")
                     # Update the x min
                     if x <= self.x_min:
                         self.x_min = x
@@ -645,6 +655,21 @@ class MainWindow(QMainWindow):
         # Y coordinate
         self.ui.lbl_mouse_pos_y.setText(
             str('{:.1f}'.format(float((self.scene_h - pos.y()) * (1/self.scale_factor)))))
+
+    def mapRange(self, value, source_min, source_max, target_min, target_max):
+        '''
+        Maps a value from a range to another.
+        Here it is used to convert a depth value to a color, the deeper is the engraving, the higher is the color value.
+        '''
+        # Figure out how 'wide' each range is
+        left_span = source_max - source_min
+        right_span = target_max - target_min
+
+        # Convert the left range into a 0-1 range (float)
+        value_scaled = float(value - source_min) / float(left_span)
+
+        # Convert the 0-1 range into a value in the right range.
+        return target_min + (value_scaled * right_span)
 
     def draw(self):
         '''
@@ -824,8 +849,7 @@ class MainWindow(QMainWindow):
                     # values increas from bottom to top, in the canvas instead goes from top to bottom
                     p1 = QtCore.QPoint(
                         current_position[0] * self.scale_factor,
-                        self.scene_h -
-                        (current_position[1] * self.scale_factor)
+                        self.scene_h - (current_position[1] * self.scale_factor)
                     )
 
                     p2 = QtCore.QPoint(
@@ -833,8 +857,16 @@ class MainWindow(QMainWindow):
                         self.scene_h - (coords[i][1] * self.scale_factor)
                     )
 
+                    mapped_color = int(self.mapRange(abs(coords[i][2]), 10, abs(self.z_max), 0, 255))
+
+                    # Red to Green color
+                    color = QtGui.QColor(255-mapped_color, 255-mapped_color, mapped_color)
+
+                    # Gray scale color: the deeper the darker
+                    # color = QtGui.QColor(255-mapped_color, 255-mapped_color, 255-mapped_color)
+
                     # Add the segment to the scene
-                    self.scene.addLine(QtCore.QLine(p1, p2))
+                    self.scene.addLine(QtCore.QLine(p1, p2), color)
 
                     # Update the current position
                     current_position = (
