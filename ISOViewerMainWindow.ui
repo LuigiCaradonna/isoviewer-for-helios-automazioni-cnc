@@ -1233,6 +1233,17 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <tabstops>
+  <tabstop>in_width</tabstop>
+  <tabstop>in_height</tabstop>
+  <tabstop>in_tool_speed</tabstop>
+  <tabstop>chk_autoresize</tabstop>
+  <tabstop>chk_sculpture</tabstop>
+  <tabstop>btn_browse_file</tabstop>
+  <tabstop>btn_draw</tabstop>
+  <tabstop>btn_reset</tabstop>
+  <tabstop>canvas</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

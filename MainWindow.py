@@ -338,6 +338,7 @@ class MainWindow(QMainWindow):
         self.ui.in_width.setText('0')
         self.ui.in_height.setText('0')
         self.ui.in_tool_speed.setText('1000')
+        self.ui.chk_sculpture.setChecked(False)
 
     def resetScene(self, reset_to_draw=False):
         '''
@@ -434,6 +435,7 @@ class MainWindow(QMainWindow):
         for file in self.iso_files:
             # Opens the ISO file
             original_file = open(file, 'r')
+
             # Add the file content to the list of instructions
             iso += original_file.readlines()
             # Close the file
@@ -442,9 +444,17 @@ class MainWindow(QMainWindow):
         # The PGR files conatining a sculpture are slightly different from a general one
         # If the file to show contains a sculpture (the user has to tell us)
         if self.ui.chk_sculpture.isChecked():
-            # Add this two lines to adapt it to a general PGR file
-            iso.insert(5,'G12 Z0')
-            iso.insert(7,'G02 Z-10')
+            j = 0
+            start_position = []
+            for loc in iso:
+                if loc.find('QUOTE RELATIVE') == 0:
+                    start_position.insert(0, j)
+                j += 1
+
+            for pos in start_position:
+                # Add this two lines to adapt it to a general PGR file
+                iso.insert(pos+5, 'G12 Z0')
+                iso.insert(pos+7, 'G02 Z-10')
 
         num_rows = len(iso)
 
@@ -669,7 +679,7 @@ class MainWindow(QMainWindow):
         value_scaled = float(value - source_min) / float(left_span)
 
         # Convert the 0-1 range into a value in the right range.
-        return target_min + (value_scaled * right_span)
+        return int(target_min + (value_scaled * right_span))
 
     def draw(self):
         '''
@@ -849,7 +859,8 @@ class MainWindow(QMainWindow):
                     # values increas from bottom to top, in the canvas instead goes from top to bottom
                     p1 = QtCore.QPoint(
                         current_position[0] * self.scale_factor,
-                        self.scene_h - (current_position[1] * self.scale_factor)
+                        self.scene_h -
+                        (current_position[1] * self.scale_factor)
                     )
 
                     p2 = QtCore.QPoint(
@@ -857,10 +868,12 @@ class MainWindow(QMainWindow):
                         self.scene_h - (coords[i][1] * self.scale_factor)
                     )
 
-                    mapped_color = int(self.mapRange(abs(coords[i][2]), 10, abs(self.z_max), 0, 255))
+                    mapped_color = self.mapRange(
+                        abs(coords[i][2]), 10, abs(self.z_max), 0, 255)
 
-                    # Red to Green color
-                    color = QtGui.QColor(255-mapped_color, 255-mapped_color, mapped_color)
+                    # Yellow to Blue color
+                    color = QtGui.QColor(
+                        255-mapped_color, 255-mapped_color, mapped_color)
 
                     # Gray scale color: the deeper the darker
                     # color = QtGui.QColor(255-mapped_color, 255-mapped_color, 255-mapped_color)
