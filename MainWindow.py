@@ -26,6 +26,8 @@ class MainWindow(QMainWindow):
     scene_w = 0
     scene_h = 0
 
+    config_file = 'config.cfg'
+
     # Setting the antialiasing for the canvas, active by default,
     # (self.ui.canvas.DontAdjustForAntialiasing(False) to disable)
     # the canvas area is extended by 4 pixels over the visible area, and the mouse position
@@ -64,10 +66,16 @@ class MainWindow(QMainWindow):
         # Sets an icon for the window
         self.setWindowIcon(QtGui.QIcon('favicon.png'))
 
-        # Binds the buttons to the corresponding method to fire
+        # Bind the buttons to the corresponding method to fire
         self.ui.btn_draw.clicked.connect(self.draw)
         self.ui.btn_reset.clicked.connect(self.fullReset)
         self.ui.btn_browse_file.clicked.connect(self.browseFile)
+
+        # Bind the checkboxes to the corresponding method to persist the selection
+        self.ui.chk_fit.stateChanged.connect(self.changeFit)
+        self.ui.chk_autoresize.stateChanged.connect(self.changeAutoResize)
+        self.ui.chk_color.stateChanged.connect(self.changeColor)
+
         # Instantiates a scene
         self.scene = MyGraphicsScene()
         # Intercepts the signal emitted and connects it to the mousePosition() method
@@ -103,6 +111,8 @@ class MainWindow(QMainWindow):
             'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
         self.ui.lbl_pos_dst_value.setStyleSheet(
             'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
+
+        '''
         # To center the checkbox
         self.ui.chk_autoresize.setStyleSheet("padding-left:5px;")
         self.ui.chk_sculpture.setStyleSheet("padding-left:14px;")
@@ -116,11 +126,31 @@ class MainWindow(QMainWindow):
         self.setTabOrder(self.ui.in_tool_speed, self.ui.chk_autoresize)
         # chk_autoresize -> chk_sculpture
         self.setTabOrder(self.ui.chk_autoresize, self.ui.chk_sculpture)
+        '''
+
+        with open(self.config_file, "r") as f:
+            config = f.readline()
+            f.close()
+
+            if config[0] == '1':
+                self.ui.chk_fit.setChecked(True)
+            else:
+                self.ui.chk_fit.setChecked(False)
+
+            if config[1] == '1':
+                self.ui.chk_autoresize.setChecked(True)
+            else:
+                self.ui.chk_autoresize.setChecked(False)
+
+            if config[2] == '1':
+                self.ui.chk_color.setChecked(True)
+            else:
+                self.ui.chk_color.setChecked(False)
 
         # Timer to manage the delay when regenerating the drawing when the scene is resized
         self.reset_timer = QtCore.QTimer(self)
         # Set the timer as single shot.
-        # I'm not using a singleshot timer because it doesn't have the stop() method which
+        # I'm not directly using a singleshot timer because it doesn't have the stop() method which
         # is required to simulate a reset as implemented in the resizeEvent() method
         self.reset_timer.setSingleShot(True)
         self.reset_timer.timeout.connect(self.draw)
@@ -128,6 +158,47 @@ class MainWindow(QMainWindow):
         self.delayEnabled = True
         # Delay in milliseconds
         self.delayTimeout = 500
+
+    def changeFit(self):
+        '''
+        Updates the setting value for the fit option inside the config file 
+        '''
+        value = '1' if self.ui.chk_fit.isChecked() else '0'
+
+        with open(self.config_file, "r+") as f:
+            content = f.read()
+            content = value + content[1:]
+            f.seek(0)
+            f.write(content)
+            f.truncate()
+
+    def changeAutoResize(self):
+        '''
+        Updates the setting value for the auto resize option inside the config file 
+        '''
+
+        value = '1' if self.ui.chk_autoresize.isChecked() else '0'
+
+        with open(self.config_file, "r+") as f:
+            content = f.read()
+            content = content[:1] + value + content[2:]
+            f.seek(0)
+            f.write(content)
+            f.truncate()
+
+    def changeColor(self):
+        '''
+        Updates the setting value for the color option inside the config file 
+        '''
+
+        value = '1' if self.ui.chk_color.isChecked() else '0'
+
+        with open(self.config_file, "r+") as f:
+            content = f.read()
+            content = content[:2] + value
+            f.seek(0)
+            f.write(content)
+            f.truncate()
 
     def resizeEvent(self, event):
         '''
@@ -333,6 +404,9 @@ class MainWindow(QMainWindow):
         return scale_x if scale_x <= scale_y else scale_y
 
     def fullReset(self):
+        '''
+        Resets all the input fields, the errors  and the scene
+        '''
         self.resetErrors()
         self.resetScene()
         self.ui.in_width.setText('0')
@@ -696,7 +770,19 @@ class MainWindow(QMainWindow):
             # Prepare the scene
             self.setScene()
 
-            # Limit the valueas to the 3 decimals and print them on the proper label
+            # Absolute z_max value used to calculate the color of the segments
+            abs_z_max = abs(self.z_max)
+
+            color = self.ui.chk_color.isChecked()
+
+            # If the user doesn't want to fit the visible area AND the scale factor is > 1
+            # The second condition is to force the scaling down when the drawing size exceeds the canvas size
+            # in that case the scale factor will be < 1 and must not be changed or part of it will not be visible
+            if not self.ui.chk_fit.isChecked() and self.scale_factor > 1:
+                # Set the scale factor to a neutral value
+                self.scale_factor = 1
+
+            # Limit the values to the 3 decimals and print them on the proper label
             self.ui.lbl_x_min_value.setText('{:.3f}'.format(self.x_min))
             self.ui.lbl_x_max_value.setText('{:.3f}'.format(self.x_max))
             self.ui.lbl_y_min_value.setText('{:.3f}'.format(self.y_min))
@@ -868,18 +954,35 @@ class MainWindow(QMainWindow):
                         self.scene_h - (coords[i][1] * self.scale_factor)
                     )
 
-                    mapped_color = self.mapRange(
-                        abs(coords[i][2]), 10, abs(self.z_max), 0, 255)
+                    start_mapped_color = self.mapRange(
+                        abs(current_position[2]), 10, abs_z_max, 0, 255)
 
-                    # Yellow to Blue color
-                    color = QtGui.QColor(
-                        255-mapped_color, 255-mapped_color, mapped_color)
+                    end_mapped_color = self.mapRange(
+                        abs(coords[i][2]), 10, abs_z_max, 0, 255)
 
-                    # Gray scale color: the deeper the darker
-                    # color = QtGui.QColor(255-mapped_color, 255-mapped_color, 255-mapped_color)
+                    if color:
+                        # Yellow to Blue color
+                        start_color = QtGui.QColor(
+                            255-start_mapped_color, 255-start_mapped_color, start_mapped_color)
+
+                        end_color = QtGui.QColor(
+                            255-end_mapped_color, 255-end_mapped_color, end_mapped_color)
+                    else:
+                        # Grayscale
+                        start_color = QtGui.QColor(
+                            255-start_mapped_color, 255-start_mapped_color, 255-start_mapped_color)
+
+                        end_color = QtGui.QColor(
+                            255-end_mapped_color, 255-end_mapped_color, 255-end_mapped_color)
+
+                    gradient = QtGui.QLinearGradient(p1, p2)
+                    gradient.setColorAt(0, start_color)
+                    gradient.setColorAt(1, end_color)
+
+                    gradient_pen = QtGui.QPen(QtGui.QBrush(gradient), 1)
 
                     # Add the segment to the scene
-                    self.scene.addLine(QtCore.QLine(p1, p2), color)
+                    self.scene.addLine(QtCore.QLine(p1, p2), pen=gradient_pen)
 
                     # Update the current position
                     current_position = (
