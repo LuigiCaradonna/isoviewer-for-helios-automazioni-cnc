@@ -112,22 +112,32 @@ class MainWindow(QMainWindow):
         self.ui.lbl_pos_dst_value.setStyleSheet(
             'background-color: #DDDDDD; border: 1px solid #BBBBBB;')
 
-        '''
-        # To center the checkbox
-        self.ui.chk_autoresize.setStyleSheet("padding-left:5px;")
-        self.ui.chk_sculpture.setStyleSheet("padding-left:14px;")
+        # If the config file does not exist
+        if not os.path.isfile(self.config_file):
+            # Create a new one with default values
+            with open(self.config_file, 'w') as f:
+                f.write('000')
+                f.close()
 
-        # Set the focusing order for the input fields when the tab key is pressed
-        # in_width -> in_height
-        self.setTabOrder(self.ui.in_width, self.ui.in_height)
-        # in_height -> in_tool_speed
-        self.setTabOrder(self.ui.in_height, self.ui.in_tool_speed)
-        # in_tool_speed -> chk_autoresize
-        self.setTabOrder(self.ui.in_tool_speed, self.ui.chk_autoresize)
-        # chk_autoresize -> chk_sculpture
-        self.setTabOrder(self.ui.chk_autoresize, self.ui.chk_sculpture)
-        '''
+        # Set the checkboxes according to the config file
+        self.initOptions()
 
+        # Timer to manage the delay when regenerating the drawing when the scene is resized
+        self.reset_timer = QtCore.QTimer(self)
+        # Set the timer as single shot.
+        # I'm not directly using a singleshot timer because it doesn't have the stop() method which
+        # is required to simulate a reset as implemented in the resizeEvent() method
+        self.reset_timer.setSingleShot(True)
+        self.reset_timer.timeout.connect(self.draw)
+        # Says whether the timer must be used or not
+        self.delayEnabled = True
+        # Delay in milliseconds
+        self.delayTimeout = 500
+
+    def initOptions(self):
+        '''
+        Reads the config file and sets the corresponding checkboxes
+        '''
         with open(self.config_file, "r") as f:
             config = f.readline()
             f.close()
@@ -146,18 +156,6 @@ class MainWindow(QMainWindow):
                 self.ui.chk_color.setChecked(True)
             else:
                 self.ui.chk_color.setChecked(False)
-
-        # Timer to manage the delay when regenerating the drawing when the scene is resized
-        self.reset_timer = QtCore.QTimer(self)
-        # Set the timer as single shot.
-        # I'm not directly using a singleshot timer because it doesn't have the stop() method which
-        # is required to simulate a reset as implemented in the resizeEvent() method
-        self.reset_timer.setSingleShot(True)
-        self.reset_timer.timeout.connect(self.draw)
-        # Says whether the timer must be used or not
-        self.delayEnabled = True
-        # Delay in milliseconds
-        self.delayTimeout = 500
 
     def changeFit(self):
         '''
@@ -699,20 +697,26 @@ class MainWindow(QMainWindow):
 
         # If at least one of the offset has been set
         if self.offset_x > 0 or self.offset_y > 0:
-            num_coords = len(coords)
-
-            # For each coordinate in the list
-            for i in range(num_coords-1):
-                # If the current tuple does not contain a movement indication
-                if coords[i][0] != 'up' and coords[i][0] != 'down':
-                    # Add the offsets to move the drawing into the positive area
-                    new_x = float(coords[i][0]) + self.offset_x
-                    new_y = float(coords[i][1]) + self.offset_y
-                    coords[i] = (new_x, new_y, coords[i][2])
+            coords = self.traslateCoords(coords, self.offset_x, self.offset_y)
 
         pd.setValue(num_rows-1)
 
         # Return the list
+        return coords
+
+    def traslateCoords(self, coords, dx, dy):
+        '''
+        Traslate the provided coordinates along x any axes by the given amount dx and dy
+        '''
+        # For each coordinate in the list
+        for i in range(len(coords)-1):
+            # If the current tuple does not contain a movement indication
+            if coords[i][0] != 'up' and coords[i][0] != 'down':
+                # Add the offsets to move the drawing into the positive area
+                new_x = float(coords[i][0]) + dx
+                new_y = float(coords[i][1]) + dy
+                coords[i] = (new_x, new_y, coords[i][2])
+        
         return coords
 
     def workingTime(self, eng_dst, pos_dst):
