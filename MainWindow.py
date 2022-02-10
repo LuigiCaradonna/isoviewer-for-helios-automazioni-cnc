@@ -458,22 +458,51 @@ class MainWindow(QMainWindow):
         # Canvas size
         canvas_w, canvas_h = self.getCanvasSize()
 
-        # If a width has been set, also the hight is set, the validate() method takes care of that
-        if width > 0:
-            # Calculate the scale factor to fit the scene
-            self.scale_factor = self.scaleFactor(width, height)
+        # If the drawing must be adapted to the canvas size
+        if self.ui.chk_fit.isChecked():
+            # If a width has been set, also the hight is set, the validate() method takes care of that
+            if width > 0:
+                # Calculate the scale factor to fit the scene
+                self.scale_factor = self.scaleFactor(width, height)
 
-            # Assign the slab size resized according to the scale factor
-            self.scene_w = width * self.scale_factor
-            self.scene_h = height * self.scale_factor
-        # The slab size has not been set
+                # Assign the slab size resized according to the scale factor
+                self.scene_w = width * self.scale_factor
+                self.scene_h = height * self.scale_factor
+                    
+            # The slab size has not been set
+            else:
+                # To calculate the scale factor, consider the drwaing size
+                self.scale_factor = self.scaleFactor(self.x_max, self.y_max)
+
+                # Assign the canvas size
+                self.scene_w = canvas_w
+                self.scene_h = canvas_h
         else:
-            # To calculate the scale factor, consider the drwaing size
-            self.scale_factor = self.scaleFactor(self.x_max, self.y_max)
+            # If a width has been set, also the hight is set, the validate() method takes care of that
+            if width > 0:
+                self.scale_factor = self.scaleFactor(width, height)
 
-            # Assign the canvas size
-            self.scene_w = canvas_w
-            self.scene_h = canvas_h
+                # The scale factor must be != 1 only if the regular drawing's size exceeds the canvas
+                # which happens if the scale factor calculated is less than 1
+                if self.scale_factor > 1:
+                    self.scale_factor = 1
+
+                # Assign the slab size
+                self.scene_w = width * self.scale_factor
+                self.scene_h = height * self.scale_factor
+                    
+            # The slab size has not been set
+            else:
+                # To calculate the scale factor, consider the drwaing size
+                self.scale_factor = self.scaleFactor(self.x_max, self.y_max)
+                
+                # As above
+                if self.scale_factor > 1:
+                    self.scale_factor = 1
+
+                # Assign the canvas size
+                self.scene_w = canvas_w
+                self.scene_h = canvas_h
 
         # Set the scene as big as the canvas
         self.scene.setSceneRect(0, 0, canvas_w, canvas_h)
