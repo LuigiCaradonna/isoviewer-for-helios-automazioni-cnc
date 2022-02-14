@@ -32,7 +32,7 @@ By selecting the `Adatta` checkbox (17) the drawing will be scaled to fit the dr
 `Autoresize` (18), when checked, will cause the drawing to be regenerated if the main window is resized to adapt to the new drawing area size.  
 If the file selected contains the instructions to engrave a sculpture, the `Scultura` checkbox (19) **must** be checked because that kind of file is slightly different from the regular ones and the software needs to be informed to correctly read the file.  
 Operating on the `Colori` checkbox (20) it is possible to decide to have the drawing displayed using a grayscale (unchecked) or colors (checked).  
-The software only shows segments with positive coordinates, for this reason, when a drawing has parts with negative coordinates, it will be traslated to have all of its parts in a positive area (first quadrant of the Cartesian plane). When such a condition occurs, inside the `Offset` field (10) will be stated along which axis the drawing has been traslated (X, Y, or X and Y).
+The software only shows segments with positive coordinates, for this reason, when a drawing has parts with negative coordinates, it will be translated to have all of its parts in a positive area (first quadrant of the Cartesian plane). When such a condition occurs, inside the `Offset` field (10) will be stated along which axis the drawing has been translated (X, Y, or X and Y).
 
 **1 -** Drawing area, here is where the drawing will be displayed  
 **2 and 3 -** Width and height of the material to work on in millimeters  
