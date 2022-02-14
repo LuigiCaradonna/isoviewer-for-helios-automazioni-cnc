@@ -1,5 +1,6 @@
 from PySide6 import (QtCore, QtGui)
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QGraphicsScene, QProgressDialog
+from more_itertools import padded
 from UiMainwindow import Ui_MainWindow
 import os.path
 import math
@@ -75,6 +76,7 @@ class MainWindow(QMainWindow):
         self.ui.chk_fit.stateChanged.connect(self.changeFit)
         self.ui.chk_autoresize.stateChanged.connect(self.changeAutoResize)
         self.ui.chk_color.stateChanged.connect(self.changeColor)
+        self.ui.chk_gradient.stateChanged.connect(self.changeGradient)
 
         # Instantiates a scene
         self.scene = MyGraphicsScene()
@@ -157,18 +159,27 @@ class MainWindow(QMainWindow):
             else:
                 self.ui.chk_color.setChecked(False)
 
+    def updateConfig(self, position, value):
+        '''
+        Updates the content of the config file according to the checkboxes status
+        '''
+        
+        with open(self.config_file, "r+") as f:
+            content = f.read()
+            content = content.split(',')
+            content[position] = value
+            content = ','.join(content)
+            f.seek(0)
+            f.write(content)
+            f.truncate()
+
     def changeFit(self):
         '''
         Updates the setting value for the fit option inside the config file 
         '''
         value = '1' if self.ui.chk_fit.isChecked() else '0'
 
-        with open(self.config_file, "r+") as f:
-            content = f.read()
-            content = value + content[1:]
-            f.seek(0)
-            f.write(content)
-            f.truncate()
+        self.updateConfig(0, value)
 
     def changeAutoResize(self):
         '''
@@ -177,12 +188,7 @@ class MainWindow(QMainWindow):
 
         value = '1' if self.ui.chk_autoresize.isChecked() else '0'
 
-        with open(self.config_file, "r+") as f:
-            content = f.read()
-            content = content[:1] + value + content[2:]
-            f.seek(0)
-            f.write(content)
-            f.truncate()
+        self.updateConfig(1, value)
 
     def changeColor(self):
         '''
@@ -191,12 +197,16 @@ class MainWindow(QMainWindow):
 
         value = '1' if self.ui.chk_color.isChecked() else '0'
 
-        with open(self.config_file, "r+") as f:
-            content = f.read()
-            content = content[:2] + value
-            f.seek(0)
-            f.write(content)
-            f.truncate()
+        self.updateConfig(2, value)
+        
+    def changeGradient(self):
+        '''
+        Updates the setting value for the gradient option inside the config file 
+        '''
+
+        value = '1' if self.ui.chk_gradient.isChecked() else '0'
+
+        self.updateConfig(3, value)
 
     def resizeEvent(self, event):
         '''
@@ -806,7 +816,8 @@ class MainWindow(QMainWindow):
             # Absolute z_max value used to calculate the color of the segments
             abs_z_max = abs(self.z_max)
 
-            color = self.ui.chk_color.isChecked()
+            draw_color = self.ui.chk_color.isChecked()
+            draw_gradient = self.ui.chk_gradient.isChecked()
 
             # If the user doesn't want to fit the visible area AND the scale factor is > 1
             # The second condition is to force the scaling down when the drawing size exceeds the canvas size
@@ -987,35 +998,44 @@ class MainWindow(QMainWindow):
                         self.scene_h - (coords[i][1] * self.scale_factor)
                     )
 
-                    start_mapped_color = self.mapRange(
-                        abs(current_position[2]), 10, abs_z_max, 0, 255)
+                    if draw_gradient:
 
-                    end_mapped_color = self.mapRange(
-                        abs(coords[i][2]), 10, abs_z_max, 0, 255)
+                        start_mapped_color = self.mapRange(
+                            abs(current_position[2]), 10, abs_z_max, 0, 255)
 
-                    if color:
-                        # Yellow to Blue color
-                        start_color = QtGui.QColor(
-                            255-start_mapped_color, 255-start_mapped_color, start_mapped_color)
+                        end_mapped_color = self.mapRange(
+                            abs(coords[i][2]), 10, abs_z_max, 0, 255)
 
-                        end_color = QtGui.QColor(
-                            255-end_mapped_color, 255-end_mapped_color, end_mapped_color)
+                        if draw_color:
+                            # Yellow to Blue color
+                            start_color = QtGui.QColor(
+                                255-start_mapped_color, 255-start_mapped_color, start_mapped_color)
+
+                            end_color = QtGui.QColor(
+                                255-end_mapped_color, 255-end_mapped_color, end_mapped_color)
+                        else:
+                            # Grayscale
+                            start_color = QtGui.QColor(
+                                255-start_mapped_color, 255-start_mapped_color, 255-start_mapped_color)
+
+                            end_color = QtGui.QColor(
+                                255-end_mapped_color, 255-end_mapped_color, 255-end_mapped_color)
+
+                        gradient = QtGui.QLinearGradient(p1, p2)
+                        gradient.setColorAt(0, start_color)
+                        gradient.setColorAt(1, end_color)
+
+                        pen = QtGui.QPen(QtGui.QBrush(gradient), 1)
                     else:
-                        # Grayscale
-                        start_color = QtGui.QColor(
-                            255-start_mapped_color, 255-start_mapped_color, 255-start_mapped_color)
-
-                        end_color = QtGui.QColor(
-                            255-end_mapped_color, 255-end_mapped_color, 255-end_mapped_color)
-
-                    gradient = QtGui.QLinearGradient(p1, p2)
-                    gradient.setColorAt(0, start_color)
-                    gradient.setColorAt(1, end_color)
-
-                    gradient_pen = QtGui.QPen(QtGui.QBrush(gradient), 1)
+                        if draw_color:
+                            color = QtGui.QColor(0, 0, 255)
+                            pen = QtGui.QPen(QtGui.QBrush(color), 1)
+                        else:
+                            color = QtGui.QColor(0, 0, 0)
+                            pen = QtGui.QPen(QtGui.QBrush(color), 1)
 
                     # Add the segment to the scene
-                    self.scene.addLine(QtCore.QLine(p1, p2), pen=gradient_pen)
+                    self.scene.addLine(QtCore.QLine(p1, p2), pen=pen)
 
                     # Update the current position
                     current_position = (

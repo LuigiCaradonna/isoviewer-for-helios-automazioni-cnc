@@ -1143,6 +1143,33 @@
            <property name="topMargin">
             <number>20</number>
            </property>
+           <item row="0" column="0">
+            <widget class="QCheckBox" name="chk_fit">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="toolTip">
+              <string>Adatta la dimensione del disegno all'area disponibile</string>
+             </property>
+             <property name="text">
+              <string>Adatta</string>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="1">
             <widget class="QCheckBox" name="chk_autoresize">
              <property name="minimumSize">
@@ -1175,12 +1202,12 @@
               </size>
              </property>
              <property name="checked">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QCheckBox" name="chk_fit">
+           <item row="1" column="1">
+            <widget class="QCheckBox" name="chk_color">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -1199,10 +1226,10 @@
               </font>
              </property>
              <property name="toolTip">
-              <string>Adatta la dimensione del disegno all'area disponibile</string>
+              <string>Traccia le linee a colori o scala di grigi</string>
              </property>
              <property name="text">
-              <string>Adatta</string>
+              <string>Colori</string>
              </property>
             </widget>
            </item>
@@ -1233,8 +1260,8 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="1">
-            <widget class="QCheckBox" name="chk_color">
+           <item row="2" column="1">
+            <widget class="QCheckBox" name="chk_gradient">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -1253,10 +1280,10 @@
               </font>
              </property>
              <property name="toolTip">
-              <string>Traccia le linee a colori o scala di grigi</string>
+              <string>Indica se usare colori sfumati per indicare la profondità di incisione</string>
              </property>
              <property name="text">
-              <string>Colori</string>
+              <string>Gradiente</string>
              </property>
             </widget>
            </item>

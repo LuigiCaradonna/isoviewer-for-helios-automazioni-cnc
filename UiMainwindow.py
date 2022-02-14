@@ -1,19 +1,24 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-# Form generated from reading UI file 'ISOViewerMainWindow.ui'
+## Form generated from reading UI file 'ISOViewerMainWindow.ui'
 ##
-# Created by: Qt User Interface Compiler version 6.2.1
+## Created by: Qt User Interface Compiler version 6.2.1
 ##
-# WARNING! All changes made in this file will be lost when recompiling UI file!
+## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize, Qt)
-from PySide6.QtGui import (QCursor, QFont)
-from PySide6.QtWidgets import (QCheckBox, QFrame, QGraphicsView, QGridLayout,
-                               QHBoxLayout, QLabel, QLineEdit, QMenuBar, QPushButton, 
-                               QSizePolicy, QSpacerItem, QStatusBar, QVBoxLayout, QWidget)
-
+from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+    QMetaObject, QObject, QPoint, QRect,
+    QSize, QTime, QUrl, Qt)
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
+    QFont, QFontDatabase, QGradient, QIcon,
+    QImage, QKeySequence, QLinearGradient, QPainter,
+    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QFrame, QGraphicsView,
+    QGridLayout, QHBoxLayout, QLabel, QLineEdit,
+    QMainWindow, QMenuBar, QPushButton, QSizePolicy,
+    QSpacerItem, QStatusBar, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -48,6 +53,7 @@ class Ui_MainWindow(object):
 
         self.gridLayout_3.addWidget(self.canvas, 0, 0, 1, 1)
 
+
         self.verticalLayout.addWidget(self.fr_canvas_container)
 
         self.horizontalLayout_2 = QHBoxLayout()
@@ -67,8 +73,7 @@ class Ui_MainWindow(object):
         sizePolicy = QSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.lbl_selected_file.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(self.lbl_selected_file.sizePolicy().hasHeightForWidth())
         self.lbl_selected_file.setSizePolicy(sizePolicy)
         self.lbl_selected_file.setText(u"")
         self.lbl_selected_file.setTextFormat(Qt.PlainText)
@@ -117,7 +122,7 @@ class Ui_MainWindow(object):
         font1.setFamilies([u"Courier New"])
         font1.setPointSize(12)
         self.lbl_size.setFont(font1)
-        self.lbl_size.setAlignment(Qt.AlignBottom | Qt.AlignHCenter)
+        self.lbl_size.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
 
         self.verticalLayout_5.addWidget(self.lbl_size)
 
@@ -146,7 +151,7 @@ class Ui_MainWindow(object):
         self.lbl_y_max.setMinimumSize(QSize(0, 21))
         self.lbl_y_max.setMaximumSize(QSize(16777215, 21))
         self.lbl_y_max.setFont(font1)
-        self.lbl_y_max.setAlignment(Qt.AlignBottom | Qt.AlignHCenter)
+        self.lbl_y_max.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
 
         self.gridLayout_4.addWidget(self.lbl_y_max, 6, 1, 1, 1)
 
@@ -164,7 +169,7 @@ class Ui_MainWindow(object):
         self.lbl_x_min.setMinimumSize(QSize(0, 21))
         self.lbl_x_min.setMaximumSize(QSize(16777215, 21))
         self.lbl_x_min.setFont(font1)
-        self.lbl_x_min.setAlignment(Qt.AlignBottom | Qt.AlignHCenter)
+        self.lbl_x_min.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
 
         self.gridLayout_4.addWidget(self.lbl_x_min, 4, 0, 1, 1)
 
@@ -236,7 +241,7 @@ class Ui_MainWindow(object):
         self.lbl_tool_speed.setMinimumSize(QSize(0, 21))
         self.lbl_tool_speed.setMaximumSize(QSize(16777215, 21))
         self.lbl_tool_speed.setFont(font1)
-        self.lbl_tool_speed.setAlignment(Qt.AlignBottom | Qt.AlignHCenter)
+        self.lbl_tool_speed.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
 
         self.gridLayout_4.addWidget(self.lbl_tool_speed, 2, 0, 1, 1)
 
@@ -291,7 +296,7 @@ class Ui_MainWindow(object):
         self.lbl_x_max.setMinimumSize(QSize(0, 21))
         self.lbl_x_max.setMaximumSize(QSize(16777215, 21))
         self.lbl_x_max.setFont(font1)
-        self.lbl_x_max.setAlignment(Qt.AlignBottom | Qt.AlignHCenter)
+        self.lbl_x_max.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
 
         self.gridLayout_4.addWidget(self.lbl_x_max, 4, 1, 1, 1)
 
@@ -300,7 +305,7 @@ class Ui_MainWindow(object):
         self.lbl_y_min.setMinimumSize(QSize(0, 21))
         self.lbl_y_min.setMaximumSize(QSize(16777215, 21))
         self.lbl_y_min.setFont(font1)
-        self.lbl_y_min.setAlignment(Qt.AlignBottom | Qt.AlignHCenter)
+        self.lbl_y_min.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
 
         self.gridLayout_4.addWidget(self.lbl_y_min, 6, 0, 1, 1)
 
@@ -322,6 +327,7 @@ class Ui_MainWindow(object):
 
         self.gridLayout_4.addWidget(self.lbl_pos_dst_value, 11, 1, 1, 1)
 
+
         self.verticalLayout_5.addLayout(self.gridLayout_4)
 
         self.lbl_rectangle = QLabel(self.fr_right_col_container)
@@ -329,7 +335,7 @@ class Ui_MainWindow(object):
         self.lbl_rectangle.setMinimumSize(QSize(0, 21))
         self.lbl_rectangle.setMaximumSize(QSize(16777215, 21))
         self.lbl_rectangle.setFont(font1)
-        self.lbl_rectangle.setAlignment(Qt.AlignBottom | Qt.AlignHCenter)
+        self.lbl_rectangle.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
 
         self.verticalLayout_5.addWidget(self.lbl_rectangle)
 
@@ -347,7 +353,7 @@ class Ui_MainWindow(object):
         self.lbl_working_time.setMinimumSize(QSize(0, 21))
         self.lbl_working_time.setMaximumSize(QSize(16777215, 21))
         self.lbl_working_time.setFont(font1)
-        self.lbl_working_time.setAlignment(Qt.AlignBottom | Qt.AlignHCenter)
+        self.lbl_working_time.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
 
         self.verticalLayout_5.addWidget(self.lbl_working_time)
 
@@ -379,8 +385,7 @@ class Ui_MainWindow(object):
         font2.setFamilies([u"Courier New"])
         font2.setPointSize(11)
         self.lbl_mmx.setFont(font2)
-        self.lbl_mmx.setAlignment(
-            Qt.AlignRight | Qt.AlignTrailing | Qt.AlignVCenter)
+        self.lbl_mmx.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.horizontalLayout_3.addWidget(self.lbl_mmx)
 
@@ -398,8 +403,7 @@ class Ui_MainWindow(object):
         self.lbl_mmy.setMinimumSize(QSize(15, 0))
         self.lbl_mmy.setMaximumSize(QSize(15, 16777215))
         self.lbl_mmy.setFont(font2)
-        self.lbl_mmy.setAlignment(
-            Qt.AlignRight | Qt.AlignTrailing | Qt.AlignVCenter)
+        self.lbl_mmy.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.horizontalLayout_3.addWidget(self.lbl_mmy)
 
@@ -412,21 +416,12 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_3.addWidget(self.lbl_mouse_pos_y)
 
+
         self.verticalLayout_5.addLayout(self.horizontalLayout_3)
 
         self.gridCheckbox = QGridLayout()
         self.gridCheckbox.setObjectName(u"gridCheckbox")
         self.gridCheckbox.setContentsMargins(-1, 20, -1, -1)
-        self.chk_autoresize = QCheckBox(self.fr_right_col_container)
-        self.chk_autoresize.setObjectName(u"chk_autoresize")
-        self.chk_autoresize.setMinimumSize(QSize(0, 21))
-        self.chk_autoresize.setMaximumSize(QSize(16777215, 21))
-        self.chk_autoresize.setFont(font)
-        self.chk_autoresize.setIconSize(QSize(16, 16))
-        self.chk_autoresize.setChecked(True)
-
-        self.gridCheckbox.addWidget(self.chk_autoresize, 0, 1, 1, 1)
-
         self.chk_fit = QCheckBox(self.fr_right_col_container)
         self.chk_fit.setObjectName(u"chk_fit")
         self.chk_fit.setMinimumSize(QSize(0, 21))
@@ -435,13 +430,15 @@ class Ui_MainWindow(object):
 
         self.gridCheckbox.addWidget(self.chk_fit, 0, 0, 1, 1)
 
-        self.chk_sculpture = QCheckBox(self.fr_right_col_container)
-        self.chk_sculpture.setObjectName(u"chk_sculpture")
-        self.chk_sculpture.setMinimumSize(QSize(0, 21))
-        self.chk_sculpture.setMaximumSize(QSize(16777215, 21))
-        self.chk_sculpture.setFont(font)
+        self.chk_autoresize = QCheckBox(self.fr_right_col_container)
+        self.chk_autoresize.setObjectName(u"chk_autoresize")
+        self.chk_autoresize.setMinimumSize(QSize(0, 21))
+        self.chk_autoresize.setMaximumSize(QSize(16777215, 21))
+        self.chk_autoresize.setFont(font)
+        self.chk_autoresize.setIconSize(QSize(16, 16))
+        self.chk_autoresize.setChecked(False)
 
-        self.gridCheckbox.addWidget(self.chk_sculpture, 1, 0, 1, 1)
+        self.gridCheckbox.addWidget(self.chk_autoresize, 0, 1, 1, 1)
 
         self.chk_color = QCheckBox(self.fr_right_col_container)
         self.chk_color.setObjectName(u"chk_color")
@@ -451,14 +448,32 @@ class Ui_MainWindow(object):
 
         self.gridCheckbox.addWidget(self.chk_color, 1, 1, 1, 1)
 
+        self.chk_sculpture = QCheckBox(self.fr_right_col_container)
+        self.chk_sculpture.setObjectName(u"chk_sculpture")
+        self.chk_sculpture.setMinimumSize(QSize(0, 21))
+        self.chk_sculpture.setMaximumSize(QSize(16777215, 21))
+        self.chk_sculpture.setFont(font)
+
+        self.gridCheckbox.addWidget(self.chk_sculpture, 1, 0, 1, 1)
+
+        self.chk_gradient = QCheckBox(self.fr_right_col_container)
+        self.chk_gradient.setObjectName(u"chk_gradient")
+        self.chk_gradient.setMinimumSize(QSize(0, 21))
+        self.chk_gradient.setMaximumSize(QSize(16777215, 21))
+        self.chk_gradient.setFont(font)
+
+        self.gridCheckbox.addWidget(self.chk_gradient, 2, 1, 1, 1)
+
+
         self.verticalLayout_5.addLayout(self.gridCheckbox)
 
-        self.verticalSpacer = QSpacerItem(
-            20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.verticalLayout_5.addItem(self.verticalSpacer)
 
+
         self.horizontalLayout.addWidget(self.fr_right_col_container)
+
 
         self.gridLayout_2.addLayout(self.horizontalLayout, 0, 0, 1, 1)
 
@@ -487,112 +502,79 @@ class Ui_MainWindow(object):
     # setupUi
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate(
-            "MainWindow", u"ISO Viewer", None))
-        self.btn_browse_file.setText(
-            QCoreApplication.translate("MainWindow", u"Load files", None))
-        self.btn_draw.setText(QCoreApplication.translate(
-            "MainWindow", u"Elabora", None))
-        self.btn_reset.setText(QCoreApplication.translate(
-            "MainWindow", u"Reset", None))
-        self.lbl_size.setText(QCoreApplication.translate(
-            "MainWindow", u"Dimensioni lastra", None))
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"ISO Viewer", None))
+        self.btn_browse_file.setText(QCoreApplication.translate("MainWindow", u"Load files", None))
+        self.btn_draw.setText(QCoreApplication.translate("MainWindow", u"Elabora", None))
+        self.btn_reset.setText(QCoreApplication.translate("MainWindow", u"Reset", None))
+        self.lbl_size.setText(QCoreApplication.translate("MainWindow", u"Dimensioni lastra", None))
         self.lbl_z_max_value.setText("")
         self.lbl_y_max_value.setText("")
-        self.lbl_y_max.setText(QCoreApplication.translate(
-            "MainWindow", u"Y max", None))
-# if QT_CONFIG(tooltip)
-        self.lbl_offset.setToolTip(QCoreApplication.translate(
-            "MainWindow", u"Assi traslati per posizioni negative", None))
+        self.lbl_y_max.setText(QCoreApplication.translate("MainWindow", u"Y max", None))
+#if QT_CONFIG(tooltip)
+        self.lbl_offset.setToolTip(QCoreApplication.translate("MainWindow", u"Assi traslati per posizioni negative", None))
 #endif // QT_CONFIG(tooltip)
-        self.lbl_offset.setText(QCoreApplication.translate(
-            "MainWindow", u"Offset", None))
-        self.lbl_x_min.setText(QCoreApplication.translate(
-            "MainWindow", u"X min", None))
-# if QT_CONFIG(tooltip)
-        self.lbl_eng_dst.setToolTip(QCoreApplication.translate(
-            "MainWindow", u"Distanza incisioni", None))
+        self.lbl_offset.setText(QCoreApplication.translate("MainWindow", u"Offset", None))
+        self.lbl_x_min.setText(QCoreApplication.translate("MainWindow", u"X min", None))
+#if QT_CONFIG(tooltip)
+        self.lbl_eng_dst.setToolTip(QCoreApplication.translate("MainWindow", u"Distanza incisioni", None))
 #endif // QT_CONFIG(tooltip)
-        self.lbl_eng_dst.setText(QCoreApplication.translate(
-            "MainWindow", u"DST Inc.", None))
-        self.in_width.setText(
-            QCoreApplication.translate("MainWindow", u"0", None))
-# if QT_CONFIG(tooltip)
-        self.lbl_pos_dst.setToolTip(QCoreApplication.translate(
-            "MainWindow", u"Distanza posizionamenti", None))
+        self.lbl_eng_dst.setText(QCoreApplication.translate("MainWindow", u"DST Inc.", None))
+        self.in_width.setText(QCoreApplication.translate("MainWindow", u"0", None))
+#if QT_CONFIG(tooltip)
+        self.lbl_pos_dst.setToolTip(QCoreApplication.translate("MainWindow", u"Distanza posizionamenti", None))
 #endif // QT_CONFIG(tooltip)
-        self.lbl_pos_dst.setText(QCoreApplication.translate(
-            "MainWindow", u"DST Pos.", None))
-        self.lbl_height.setText(QCoreApplication.translate(
-            "MainWindow", u"A (mm)", None))
-        self.in_tool_speed.setText(
-            QCoreApplication.translate("MainWindow", u"1000", None))
-        self.in_height.setText(
-            QCoreApplication.translate("MainWindow", u"0", None))
-        self.lbl_width.setText(QCoreApplication.translate(
-            "MainWindow", u"L (mm)", None))
-# if QT_CONFIG(tooltip)
-        self.lbl_tool_speed.setToolTip(QCoreApplication.translate(
-            "MainWindow", u"Velocit\u00e0 avanzamento utensile", None))
+        self.lbl_pos_dst.setText(QCoreApplication.translate("MainWindow", u"DST Pos.", None))
+        self.lbl_height.setText(QCoreApplication.translate("MainWindow", u"A (mm)", None))
+        self.in_tool_speed.setText(QCoreApplication.translate("MainWindow", u"1000", None))
+        self.in_height.setText(QCoreApplication.translate("MainWindow", u"0", None))
+        self.lbl_width.setText(QCoreApplication.translate("MainWindow", u"L (mm)", None))
+#if QT_CONFIG(tooltip)
+        self.lbl_tool_speed.setToolTip(QCoreApplication.translate("MainWindow", u"Velocit\u00e0 avanzamento utensile", None))
 #endif // QT_CONFIG(tooltip)
-        self.lbl_tool_speed.setText(
-            QCoreApplication.translate("MainWindow", u"mm/min", None))
-# if QT_CONFIG(tooltip)
-        self.lbl_z_max.setToolTip(QCoreApplication.translate(
-            "MainWindow", u"Profondit\u00e0 massima di lavorazione", None))
+        self.lbl_tool_speed.setText(QCoreApplication.translate("MainWindow", u"mm/min", None))
+#if QT_CONFIG(tooltip)
+        self.lbl_z_max.setToolTip(QCoreApplication.translate("MainWindow", u"Profondit\u00e0 massima di lavorazione", None))
 #endif // QT_CONFIG(tooltip)
-        self.lbl_z_max.setText(QCoreApplication.translate(
-            "MainWindow", u"Z max", None))
+        self.lbl_z_max.setText(QCoreApplication.translate("MainWindow", u"Z max", None))
         self.lbl_x_min_value.setText("")
         self.lbl_offset_value.setText("")
         self.lbl_x_max_value.setText("")
         self.lbl_y_min_value.setText("")
-        self.lbl_x_max.setText(QCoreApplication.translate(
-            "MainWindow", u"X max", None))
-        self.lbl_y_min.setText(QCoreApplication.translate(
-            "MainWindow", u"Y min", None))
+        self.lbl_x_max.setText(QCoreApplication.translate("MainWindow", u"X max", None))
+        self.lbl_y_min.setText(QCoreApplication.translate("MainWindow", u"Y min", None))
         self.lbl_eng_dst_value.setText("")
         self.lbl_pos_dst_value.setText("")
-# if QT_CONFIG(tooltip)
-        self.lbl_rectangle.setToolTip(QCoreApplication.translate(
-            "MainWindow", u"Dimensione rettangolo circoscritto alla lavorazione", None))
+#if QT_CONFIG(tooltip)
+        self.lbl_rectangle.setToolTip(QCoreApplication.translate("MainWindow", u"Dimensione rettangolo circoscritto alla lavorazione", None))
 #endif // QT_CONFIG(tooltip)
-        self.lbl_rectangle.setText(QCoreApplication.translate(
-            "MainWindow", u"Area lavorazione", None))
+        self.lbl_rectangle.setText(QCoreApplication.translate("MainWindow", u"Area lavorazione", None))
         self.lbl_rectangle_value.setText("")
-        self.lbl_working_time.setText(QCoreApplication.translate(
-            "MainWindow", u"Tempo stimato", None))
+        self.lbl_working_time.setText(QCoreApplication.translate("MainWindow", u"Tempo stimato", None))
         self.lbl_working_time_value.setText("")
-        self.lbl_mouse_pos.setText(QCoreApplication.translate(
-            "MainWindow", u"Posizione mouse", None))
-        self.lbl_mmx.setText(
-            QCoreApplication.translate("MainWindow", u"X", None))
+        self.lbl_mouse_pos.setText(QCoreApplication.translate("MainWindow", u"Posizione mouse", None))
+        self.lbl_mmx.setText(QCoreApplication.translate("MainWindow", u"X", None))
         self.lbl_mouse_pos_x.setText("")
-        self.lbl_mmy.setText(
-            QCoreApplication.translate("MainWindow", u"Y", None))
+        self.lbl_mmy.setText(QCoreApplication.translate("MainWindow", u"Y", None))
         self.lbl_mouse_pos_y.setText("")
-# if QT_CONFIG(tooltip)
-        self.chk_autoresize.setToolTip(QCoreApplication.translate(
-            "MainWindow", u"Rigenera il disegno al ridimensionamento della finestra", None))
+#if QT_CONFIG(tooltip)
+        self.chk_fit.setToolTip(QCoreApplication.translate("MainWindow", u"Adatta la dimensione del disegno all'area disponibile", None))
 #endif // QT_CONFIG(tooltip)
-        self.chk_autoresize.setText(QCoreApplication.translate(
-            "MainWindow", u"Autoresize", None))
-# if QT_CONFIG(tooltip)
-        self.chk_fit.setToolTip(QCoreApplication.translate(
-            "MainWindow", u"Adatta la dimensione del disegno all'area disponibile", None))
+        self.chk_fit.setText(QCoreApplication.translate("MainWindow", u"Adatta", None))
+#if QT_CONFIG(tooltip)
+        self.chk_autoresize.setToolTip(QCoreApplication.translate("MainWindow", u"Rigenera il disegno al ridimensionamento della finestra", None))
 #endif // QT_CONFIG(tooltip)
-        self.chk_fit.setText(QCoreApplication.translate(
-            "MainWindow", u"Adatta", None))
-# if QT_CONFIG(tooltip)
-        self.chk_sculpture.setToolTip(QCoreApplication.translate(
-            "MainWindow", u"Selezionare se il file rappresenta una scultura", None))
+        self.chk_autoresize.setText(QCoreApplication.translate("MainWindow", u"Autoresize", None))
+#if QT_CONFIG(tooltip)
+        self.chk_color.setToolTip(QCoreApplication.translate("MainWindow", u"Traccia le linee a colori o scala di grigi", None))
 #endif // QT_CONFIG(tooltip)
-        self.chk_sculpture.setText(
-            QCoreApplication.translate("MainWindow", u"Scultura", None))
-# if QT_CONFIG(tooltip)
-        self.chk_color.setToolTip(QCoreApplication.translate(
-            "MainWindow", u"Traccia le linee a colori o scala di grigi", None))
+        self.chk_color.setText(QCoreApplication.translate("MainWindow", u"Colori", None))
+#if QT_CONFIG(tooltip)
+        self.chk_sculpture.setToolTip(QCoreApplication.translate("MainWindow", u"Selezionare se il file rappresenta una scultura", None))
 #endif // QT_CONFIG(tooltip)
-        self.chk_color.setText(QCoreApplication.translate(
-            "MainWindow", u"Colori", None))
+        self.chk_sculpture.setText(QCoreApplication.translate("MainWindow", u"Scultura", None))
+#if QT_CONFIG(tooltip)
+        self.chk_gradient.setToolTip(QCoreApplication.translate("MainWindow", u"Indica se usare colori sfumati per indicare la profondit\u00e0 di incisione", None))
+#endif // QT_CONFIG(tooltip)
+        self.chk_gradient.setText(QCoreApplication.translate("MainWindow", u"Gradiente", None))
     # retranslateUi
+
