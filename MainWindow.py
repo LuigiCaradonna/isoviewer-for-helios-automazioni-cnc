@@ -468,7 +468,7 @@ class MainWindow(QMainWindow):
                 # Assign the slab size resized according to the scale factor
                 self.scene_w = width * self.scale_factor
                 self.scene_h = height * self.scale_factor
-                    
+
             # The slab size has not been set
             else:
                 # To calculate the scale factor, consider the drwaing size
@@ -490,12 +490,12 @@ class MainWindow(QMainWindow):
                 # Assign the slab size
                 self.scene_w = width * self.scale_factor
                 self.scene_h = height * self.scale_factor
-                    
+
             # The slab size has not been set
             else:
                 # To calculate the scale factor, consider the drwaing size
                 self.scale_factor = self.scaleFactor(self.x_max, self.y_max)
-                
+
                 # As above
                 if self.scale_factor > 1:
                     self.scale_factor = 1
@@ -745,7 +745,7 @@ class MainWindow(QMainWindow):
                 new_x = float(coords[i][0]) + dx
                 new_y = float(coords[i][1]) + dy
                 coords[i] = (new_x, new_y, coords[i][2])
-        
+
         return coords
 
     def workingTime(self, eng_dst, pos_dst):
