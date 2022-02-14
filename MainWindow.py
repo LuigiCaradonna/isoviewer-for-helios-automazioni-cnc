@@ -726,16 +726,16 @@ class MainWindow(QMainWindow):
 
         # If at least one of the offset has been set
         if self.offset_x > 0 or self.offset_y > 0:
-            coords = self.traslateCoords(coords, self.offset_x, self.offset_y)
+            coords = self.translateCoords(coords, self.offset_x, self.offset_y)
 
         pd.setValue(num_rows-1)
 
         # Return the list
         return coords
 
-    def traslateCoords(self, coords, dx, dy):
+    def translateCoords(self, coords, dx, dy):
         '''
-        Traslate the provided coordinates along x any axes by the given amount dx and dy
+        translate the provided coordinates along x any axes by the given amount dx and dy
         '''
         # For each coordinate in the list
         for i in range(len(coords)-1):
