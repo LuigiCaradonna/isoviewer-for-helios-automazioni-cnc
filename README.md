@@ -24,14 +24,14 @@ The whole software is written in `Python`, using `PySide6` to build the user int
 
 ## How to use
 ![Graphic User Interface](/ui.png)
-The basic usage only requires to click on the `Load files` button (21) and select one or more PGR files, then to click on the `Elabora` button (22).  
+The basic usage only requires to click on the `Load files` button (22) and select one or more PGR files, then to click on the `Elabora` button (23).  
 However you have the possibility to set several options to have different behaviours.  
 You can set the actual width and height (2 and 3) of the material to work and the drawing will respect its real position inside the material bounds, which will be displayed.  
 The provided speed of the tool (4) will have an impact only on the estimated time, which as you can read above is not accurate due to several reasons not depending on the software but on the machine's behaviour.  
 By selecting the `Adatta` checkbox (17) the drawing will be scaled to fit the drawing area, this will have effect only for drawings which are smaller than the drawing area, those bigger, will be scaled down in any case, or part of them would not be visible.  
 `Autoresize` (18), when checked, will cause the drawing to be regenerated if the main window is resized to adapt to the new drawing area size.  
 If the file selected contains the instructions to engrave a sculpture, the `Scultura` checkbox (19) **must** be checked because that kind of file is slightly different from the regular ones and the software needs to be informed to correctly read the file.  
-Operating on the `Colori` checkbox (20) it is possible to decide to have the drawing displayed using a grayscale (unchecked) or colors (checked).  
+Operating on the `Colori` checkbox (20) it is possible to decide to have the drawing displayed using a grayscale (unchecked) or colors (checked). Depending on the `Gradiente` checkbox (21) status, the segments will be drawn using a solid line (unchecked) or a gradient effect (checked).  
 The software only shows segments with positive coordinates, for this reason, when a drawing has parts with negative coordinates, it will be translated to have all of its parts in a positive area (first quadrant of the Cartesian plane). When such a condition occurs, inside the `Offset` field (10) will be stated along which axis the drawing has been translated (X, Y, or X and Y).
 
 **1 -** Drawing area, here is where the drawing will be displayed  
@@ -48,11 +48,12 @@ The software only shows segments with positive coordinates, for this reason, whe
 **18 -** When checked, the drawing will be automatically regenerated upon main window resizing  
 **19 -** This must be checked when a file containing a sculpture is selected  
 **20 -** When checked, the segments of the drawing are colored, otherwise they will be grayscaled  
-**21 -** Button to select the file(s) to display  
-**22 -** Starts the drawing process  
-**23 -** Resets everything: input values, drawing area and eventual error messages  
-**24 -** On this line will appear the name(s) of the selected file(s)  
-**25 -** Status bar, this will contain eventual error messages  
+**21 -** When checked, the segments will have a gradient effect to show the difference in depth  
+**22 -** Button to select the file(s) to display  
+**23 -** Starts the drawing process  
+**24 -** Resets everything: input values, drawing area and eventual error messages  
+**25 -** On this line will appear the name(s) of the selected file(s)  
+**26 -** Status bar, this will contain eventual error messages  
 
 ## How to compile
 To compile the software, `Python 3.8+`, `Qt 6.0+` and `PySide6` are required.
