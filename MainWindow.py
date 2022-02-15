@@ -56,7 +56,8 @@ class MainWindow(QMainWindow):
     # Says whether the timer to delay the drawing regeneration is active or not
     resize_timer_running = False
 
-    # Contains the ful
+    # Contains the full string of the selected files, only their names
+    # If needed there will be another variable containing a cut string returned by elideText()
     selected_files_full_string = ''
 
     def __init__(self):
