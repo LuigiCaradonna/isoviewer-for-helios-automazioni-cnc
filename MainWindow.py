@@ -118,7 +118,7 @@ class MainWindow(QMainWindow):
         if not os.path.isfile(self.config_file):
             # Create a new one with default values
             with open(self.config_file, 'w') as f:
-                f.write('000')
+                f.write('0,0,0,0')
                 f.close()
 
         # Set the checkboxes according to the config file
@@ -144,6 +144,8 @@ class MainWindow(QMainWindow):
             config = f.readline()
             f.close()
 
+            config = config.split(',')
+
             if config[0] == '1':
                 self.ui.chk_fit.setChecked(True)
             else:
@@ -158,6 +160,11 @@ class MainWindow(QMainWindow):
                 self.ui.chk_color.setChecked(True)
             else:
                 self.ui.chk_color.setChecked(False)
+                
+            if config[3] == '1':
+                self.ui.chk_gradient.setChecked(True)
+            else:
+                self.ui.chk_gradient.setChecked(False)
 
     def updateConfig(self, position, value):
         '''
