@@ -36,10 +36,10 @@ The software only shows segments with positive coordinates, for this reason, whe
 
 **1 -** Drawing area, here is where the drawing will be displayed  
 **2 and 3 -** Width and height of the material to work on in millimeters  
-**4 -** Movement speed of the tool in millimiters per minute  
+**4 -** Movement speed of the tool in millimeters per minute  
 **5 to 9 -** Minimum and maximum positions where the machine will engrave  
 **10 -** Here will be stated whether the drawing was moved due to negative coordinates contained into the PGR file  
-**11 -** Distance traveled while engraving in millimiters  
+**11 -** Distance traveled while engraving in millimeters  
 **12 -** Distance traveled while repositioning the tool in millimeters  
 **13 -** Area occupied by the engraving  
 **14 -** Estimated value of the required time to complete the job hh:mm:ss  
@@ -63,5 +63,5 @@ The main file in this project is `Isoviewer.py`.
 ## Installation
 Inside the folder `dist` the latest compiled version of the software for Windows is available in a zip format.
 There is no need to install the software.
-Unpack the zip package, inside the folder `Isoviewer`, find and run the file `Isoviewer.exe`.
+Unpack the zip package, inside the folder `Isoviewer`, run the file `Isoviewer.exe`.
 > Windows 10 is required since previous versions are no more supported by Python 3.9
