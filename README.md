@@ -56,7 +56,7 @@ The software only shows segments with positive coordinates, for this reason, whe
 **26 -** Status bar, this will contain eventual error messages  
 
 ## How to compile
-To compile the software, `Python 3.8+`, `Qt 6.0+` and `PySide6` are required.
+To compile the software, `Python 3.9+`, `Qt 6.0+` and `PySide6` are required.
 You can use your preferred method to compile the software, `auto-py-to-exe` for example if you want to use it on Windows platforms.
 The main file in this project is `Isoviewer.py`.
 
@@ -64,3 +64,4 @@ The main file in this project is `Isoviewer.py`.
 Inside the folder `dist` the latest compiled version of the software for Windows is available in a zip format.
 There is no need to install the software.
 Unpack the zip package, inside the folder `Isoviewer`, find and run the file `Isoviewer.exe`.
+> Windows 10 is required since previous versions are no more supported by Python 3.9
